@@ -53,7 +53,7 @@ run_restore_local() {
   local need_venv=0
   if [ ! -x "$py" ]; then
     need_venv=1
-  elif ! "$py" -c "import faster_whisper, ctranslate2, numpy, openai, videocaptioner; assert ctranslate2.get_cuda_device_count() >= 0" >/dev/null 2>&1; then
+  elif ! "$py" -c "import faster_whisper, ctranslate2, numpy, openai, httpx, videocaptioner; assert ctranslate2.get_cuda_device_count() >= 0" >/dev/null 2>&1; then
     need_venv=1
   fi
 
@@ -110,7 +110,7 @@ fi
 need_venv=0
 if [ ! -x "$py" ]; then
   need_venv=1
-elif ! "$py" -c "import faster_whisper, ctranslate2, numpy, openai, videocaptioner; assert ctranslate2.get_cuda_device_count() >= 0" >/dev/null 2>&1; then
+elif ! "$py" -c "import faster_whisper, ctranslate2, numpy, openai, httpx, videocaptioner; assert ctranslate2.get_cuda_device_count() >= 0" >/dev/null 2>&1; then
   need_venv=1
 fi
 
