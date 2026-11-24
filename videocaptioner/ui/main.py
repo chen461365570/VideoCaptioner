@@ -6,6 +6,10 @@ import sys
 
 
 def main():
+    from videocaptioner.core.utils.subprocess_helper import enable_hidden_subprocesses
+
+    enable_hidden_subprocesses()
+
     import traceback
 
     from PyQt5.QtCore import Qt, QTranslator

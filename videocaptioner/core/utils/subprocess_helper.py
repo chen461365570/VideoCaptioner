@@ -1,13 +1,42 @@
 """子进程输出流处理工具模块"""
 
+import inspect
 import queue
 import subprocess
+import sys
 import threading
 from typing import Callable, Optional, Tuple
 
 from ..utils.logger import setup_logger
 
 logger = setup_logger("subprocess_helper")
+
+
+def enable_hidden_subprocesses() -> None:
+    """Hide console children in the Windows GUI, including third-party tools.
+
+    Call before importing libraries that cache their own Popen aliases. This is
+    opt-in for the desktop entry point so command-line behavior stays unchanged.
+    """
+    if sys.platform != "win32" or getattr(subprocess.Popen, "_vc_hidden_console", False):
+        return
+
+    original_popen = subprocess.Popen
+    flags_index = tuple(inspect.signature(original_popen).parameters).index("creationflags")
+
+    class HiddenPopen(original_popen):
+        _vc_hidden_console = True
+
+        def __init__(self, *args, **kwargs):
+            if len(args) > flags_index:
+                positional = list(args)
+                positional[flags_index] |= subprocess.CREATE_NO_WINDOW
+                args = tuple(positional)
+            else:
+                kwargs["creationflags"] = kwargs.get("creationflags", 0) | subprocess.CREATE_NO_WINDOW
+            super().__init__(*args, **kwargs)
+
+    subprocess.Popen = HiddenPopen
 
 
 class StreamReader:

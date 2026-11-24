@@ -543,7 +543,12 @@ class ASRData:
                 return ASRData.from_youtube_vtt(content)
             return ASRData.from_vtt(content)
         elif suffix == ".ass":
-            return ASRData.from_ass(content)
+            data = ASRData.from_ass(content)
+            # Older GUI versions wrote edited SRT data back over .ass inputs.
+            # Recover those cues without changing the user's original file.
+            if not data.has_data() and "-->" in content:
+                return ASRData.from_srt(content)
+            return data
         elif suffix == ".json":
             return ASRData.from_json(json.loads(content))
         else:

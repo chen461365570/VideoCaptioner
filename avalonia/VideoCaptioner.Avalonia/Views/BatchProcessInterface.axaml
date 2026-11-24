@@ -1,0 +1,262 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:ui="using:FluentAvalonia.UI.Controls"
+             xmlns:svc="using:VideoCaptioner.Avalonia.Services"
+             xmlns:v="using:VideoCaptioner.Avalonia.Views"
+             x:Class="VideoCaptioner.Avalonia.Views.BatchProcessInterface"
+             DragDrop.AllowDrop="True"
+             Background="Transparent">
+  <UserControl.Styles>
+    <!-- Win11 list rows: full-width content, rounded hover/selection from the FluentAvalonia theme -->
+    <Style Selector="ListBox#TaskList ListBoxItem">
+      <Setter Property="Padding" Value="0" />
+      <Setter Property="Margin" Value="4,1" />
+      <Setter Property="MinHeight" Value="56" />
+      <Setter Property="Height" Value="56" />
+      <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+      <Setter Property="VerticalContentAlignment" Value="Stretch" />
+    </Style>
+    <Style Selector="Grid.batchHeader > TextBlock">
+      <Setter Property="FontSize" Value="12" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+      <Setter Property="VerticalAlignment" Value="Center" />
+      <Setter Property="Foreground" Value="{DynamicResource TextFillColorSecondaryBrush}" />
+    </Style>
+
+    <!-- file type tile in front of each row -->
+    <Style Selector="Border.fileTile">
+      <Setter Property="Width" Value="32" />
+      <Setter Property="Height" Value="32" />
+      <Setter Property="CornerRadius" Value="4" />
+      <Setter Property="Background" Value="{DynamicResource SubtleFillColorSecondaryBrush}" />
+    </Style>
+    <Style Selector="Border.fileTile > ui|SymbolIcon">
+      <Setter Property="FontSize" Value="18" />
+      <Setter Property="Foreground" Value="{DynamicResource AccentTextFillColorPrimaryBrush}" />
+    </Style>
+
+    <!-- status badge (radius 4, 12px text); colour-coded like Win11 InfoBar severities -->
+    <Style Selector="Border.badge">
+      <Setter Property="CornerRadius" Value="4" />
+      <Setter Property="Padding" Value="8,2" />
+      <Setter Property="MinHeight" Value="22" />
+      <Setter Property="HorizontalAlignment" Value="Left" />
+      <Setter Property="VerticalAlignment" Value="Center" />
+      <Setter Property="Background" Value="{DynamicResource SubtleFillColorSecondaryBrush}" />
+    </Style>
+    <Style Selector="Border.badge TextBlock">
+      <Setter Property="FontSize" Value="12" />
+      <Setter Property="VerticalAlignment" Value="Center" />
+      <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+      <Setter Property="Foreground" Value="{DynamicResource TextFillColorSecondaryBrush}" />
+    </Style>
+    <Style Selector="Border.badge ui|SymbolIcon">
+      <Setter Property="FontSize" Value="12" />
+      <Setter Property="Foreground" Value="{DynamicResource TextFillColorSecondaryBrush}" />
+    </Style>
+    <Style Selector="Border.badge.running">
+      <Setter Property="Background" Value="{DynamicResource SystemFillColorAttentionBackgroundBrush}" />
+    </Style>
+    <Style Selector="Border.badge.running TextBlock">
+      <Setter Property="Foreground" Value="{DynamicResource AccentTextFillColorPrimaryBrush}" />
+    </Style>
+    <Style Selector="Border.badge.running ui|SymbolIcon">
+      <Setter Property="Foreground" Value="{DynamicResource AccentTextFillColorPrimaryBrush}" />
+    </Style>
+    <Style Selector="Border.badge.completed">
+      <Setter Property="Background" Value="{DynamicResource SystemFillColorSuccessBackgroundBrush}" />
+    </Style>
+    <Style Selector="Border.badge.completed TextBlock">
+      <Setter Property="Foreground" Value="{DynamicResource SystemFillColorSuccessBrush}" />
+    </Style>
+    <Style Selector="Border.badge.completed ui|SymbolIcon">
+      <Setter Property="Foreground" Value="{DynamicResource SystemFillColorSuccessBrush}" />
+    </Style>
+    <Style Selector="Border.badge.failed">
+      <Setter Property="Background" Value="{DynamicResource SystemFillColorCriticalBackgroundBrush}" />
+    </Style>
+    <Style Selector="Border.badge.failed TextBlock">
+      <Setter Property="Foreground" Value="{DynamicResource SystemFillColorCriticalBrush}" />
+    </Style>
+    <Style Selector="Border.badge.failed ui|SymbolIcon">
+      <Setter Property="Foreground" Value="{DynamicResource SystemFillColorCriticalBrush}" />
+    </Style>
+
+    <!-- row action buttons: subtle 32x32 icon buttons -->
+    <Style Selector="Button.rowAction">
+      <Setter Property="Width" Value="32" />
+      <Setter Property="Height" Value="32" />
+      <Setter Property="Padding" Value="0" />
+      <Setter Property="HorizontalContentAlignment" Value="Center" />
+      <Setter Property="VerticalContentAlignment" Value="Center" />
+    </Style>
+    <Style Selector="Button.rowAction ui|SymbolIcon">
+      <Setter Property="FontSize" Value="16" />
+    </Style>
+
+    <!-- progress bar colour follows the task state -->
+    <Style Selector="ProgressBar.completed">
+      <Setter Property="Foreground" Value="{DynamicResource SystemFillColorSuccessBrush}" />
+    </Style>
+    <Style Selector="ProgressBar.failed">
+      <Setter Property="Foreground" Value="{DynamicResource SystemFillColorCriticalBrush}" />
+    </Style>
+  </UserControl.Styles>
+
+  <!-- Workbench layout: task list on the left, task settings on the right, action bar at the bottom -->
+  <Grid Margin="28,20,28,20" RowDefinitions="Auto,*,Auto" RowSpacing="12">
+    <!-- page title + description -->
+    <StackPanel Spacing="2">
+      <TextBlock Classes="wbTitle" Text="{svc:Tr 批量处理, Context=BatchProcessInterface}" />
+      <TextBlock Classes="caption" TextWrapping="Wrap"
+                 Text="{svc:Tr 一次添加多个音视频或字幕文件，按所选任务类型依次处理，结果保存在源文件所在的文件夹。, Context=BatchProcessInterface}" />
+    </StackPanel>
+
+    <Grid Grid.Row="1" ColumnDefinitions="*,16,288">
+      <!-- task list card: 文件 (stretch) | 进度 (170) | 状态 (124) | actions (108) -->
+      <Border Classes="card" Padding="0" MinHeight="240" ClipToBounds="True">
+        <Panel>
+          <Grid Name="ListPanel" RowDefinitions="Auto,*">
+            <Border Height="40" BorderThickness="0,0,0,1" Padding="4,0"
+                    BorderBrush="{DynamicResource DividerStrokeColorDefaultBrush}">
+              <Grid Classes="batchHeader" ColumnDefinitions="*,170,124,108">
+                <TextBlock Text="{svc:Tr 文件名, Context=BatchProcessInterface}" Margin="60,0,0,0" />
+                <TextBlock Grid.Column="1" Text="{svc:Tr 进度, Context=BatchProcessInterface}" Margin="12,0,0,0" />
+                <TextBlock Grid.Column="2" Text="{svc:Tr 状态, Context=BatchProcessInterface}" Margin="12,0,0,0" />
+              </Grid>
+            </Border>
+            <ListBox Name="TaskList" Grid.Row="1" Background="Transparent" SelectionMode="Single"
+                     Padding="0,4">
+              <ListBox.ItemTemplate>
+                <DataTemplate x:DataType="v:BatchTaskRow">
+                  <Grid ColumnDefinitions="*,170,124,108" Background="Transparent">
+                    <!-- icon + name + folder -->
+                    <Grid ColumnDefinitions="Auto,*" Margin="12,0,8,0" VerticalAlignment="Center">
+                      <Border Classes="fileTile" VerticalAlignment="Center">
+                        <ui:SymbolIcon Symbol="{Binding FileSymbol}" />
+                      </Border>
+                      <StackPanel Grid.Column="1" Margin="16,0,0,0" VerticalAlignment="Center" Spacing="1">
+                        <TextBlock Text="{Binding FileName}" ToolTip.Tip="{Binding FilePath}"
+                                   TextTrimming="CharacterEllipsis" />
+                        <TextBlock Text="{Binding Folder}" Classes="caption" TextTrimming="CharacterEllipsis" />
+                      </StackPanel>
+                    </Grid>
+                    <!-- thin progress bar + percent -->
+                    <Grid Grid.Column="1" ColumnDefinitions="*,48" Margin="12,0,0,0" VerticalAlignment="Center">
+                      <ProgressBar Minimum="0" Maximum="100" Value="{Binding Progress}" VerticalAlignment="Center" MinWidth="0" Margin="0,0,8,0"
+                                   Classes.completed="{Binding IsCompleted}" Classes.failed="{Binding IsFailed}" />
+                      <TextBlock Grid.Column="1" Classes="caption" Text="{Binding ProgressText}"
+                                 HorizontalAlignment="Right" VerticalAlignment="Center" />
+                    </Grid>
+                    <!-- status badge -->
+                    <Border Grid.Column="2" Classes="badge" Margin="12,0,8,0"
+                            Classes.running="{Binding IsRunning}"
+                            Classes.completed="{Binding IsCompleted}"
+                            Classes.failed="{Binding IsFailed}"
+                            ToolTip.Tip="{Binding StatusToolTip}">
+                      <StackPanel Orientation="Horizontal" Spacing="6">
+                        <ui:SymbolIcon Symbol="{Binding StatusSymbol}" VerticalAlignment="Center" />
+                        <TextBlock Text="{Binding Status}" MaxWidth="80" />
+                      </StackPanel>
+                    </Border>
+                    <!-- row actions -->
+                    <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="2" Margin="0,0,8,0"
+                                HorizontalAlignment="Right" VerticalAlignment="Center">
+                      <Button Classes="rowAction" Tag="start" Theme="{StaticResource TransparentButton}"
+                              IsEnabled="{Binding IsWaiting}"
+                              ToolTip.Tip="{svc:Tr 开始, Context=BatchProcessInterface}">
+                        <ui:SymbolIcon Symbol="Play" />
+                      </Button>
+                      <Button Classes="rowAction" Tag="folder" Theme="{StaticResource TransparentButton}"
+                              ToolTip.Tip="{svc:Tr 打开输出文件夹, Context=BatchProcessInterface}">
+                        <ui:SymbolIcon Symbol="OpenFolder" />
+                      </Button>
+                      <Button Classes="rowAction" Tag="more" Theme="{StaticResource TransparentButton}"
+                              ToolTip.Tip="{svc:Tr 更多, Context=BatchProcessInterface}">
+                        <ui:SymbolIcon Symbol="More" />
+                      </Button>
+                    </StackPanel>
+                  </Grid>
+                </DataTemplate>
+              </ListBox.ItemTemplate>
+            </ListBox>
+          </Grid>
+
+          <!-- empty state / drop zone -->
+          <Grid Name="EmptyState" Margin="16" Background="Transparent" Cursor="Hand">
+            <Rectangle Name="DropZone" Classes="dropZone" />
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="8" Margin="16">
+              <ui:SymbolIcon Symbol="Upload" FontSize="48" HorizontalAlignment="Center"
+                             Foreground="{DynamicResource TextFillColorTertiaryBrush}" />
+              <TextBlock Classes="strong" HorizontalAlignment="Center" Margin="0,8,0,0"
+                         Text="{svc:Tr 拖拽文件或文件夹到这里, Context=BatchProcessInterface}" />
+              <TextBlock Classes="caption" HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap"
+                         Text="{svc:Tr 也可以点击此处或“添加文件”选择文件；文件夹会展开其中的文件, Context=BatchProcessInterface}" />
+              <TextBlock Name="EmptyFormatsHint" Classes="caption" HorizontalAlignment="Center" TextWrapping="Wrap"
+                         TextAlignment="Center" Foreground="{DynamicResource TextFillColorTertiaryBrush}" />
+            </StackPanel>
+          </Grid>
+
+          <!-- drop overlay while dragging over a non-empty list -->
+          <Rectangle Name="DropOverlay" Classes="dropZone dragOver" Margin="8" IsVisible="False"
+                     IsHitTestVisible="False" />
+        </Panel>
+      </Border>
+
+      <!-- right pane: task type + list commands -->
+      <Border Grid.Column="2" Classes="card" Padding="0">
+        <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+          <StackPanel Margin="16" Spacing="12">
+            <TextBlock Classes="paneTitle" Text="{svc:Tr 任务设置, Context=BatchProcessInterface}" />
+            <StackPanel Spacing="6">
+              <TextBlock Classes="caption" Text="{svc:Tr 任务类型, Context=BatchProcessInterface}" />
+              <ComboBox Name="TaskTypeCombo" HorizontalAlignment="Stretch"
+                        ToolTip.Tip="{svc:Tr 任务类型, Context=BatchProcessInterface}" />
+            </StackPanel>
+            <!-- what the selected task type does -->
+            <Border CornerRadius="4" Padding="10,8" Background="{DynamicResource SubtleFillColorSecondaryBrush}">
+              <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
+                <ui:SymbolIcon Symbol="Forward" FontSize="14" VerticalAlignment="Top" Margin="0,2,0,0"
+                               Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                <TextBlock Name="TaskTypeHint" Grid.Column="1" Classes="caption" TextWrapping="Wrap" />
+              </Grid>
+            </Border>
+
+            <Rectangle Classes="paneDivider" />
+
+            <TextBlock Classes="paneTitle" Text="{svc:Tr 任务列表, Context=BatchProcessInterface}" />
+            <Button Name="AddFileBtn" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left">
+              <StackPanel Orientation="Horizontal" Spacing="8">
+                <ui:SymbolIcon Symbol="Add" FontSize="16" />
+                <TextBlock Text="{svc:Tr 添加文件, Context=BatchProcessInterface}" />
+              </StackPanel>
+            </Button>
+            <Button Name="ClearBtn" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left">
+              <StackPanel Orientation="Horizontal" Spacing="8">
+                <ui:SymbolIcon Symbol="Delete" FontSize="16" />
+                <TextBlock Text="{svc:Tr 清空列表, Context=BatchProcessInterface}" />
+              </StackPanel>
+            </Button>
+          </StackPanel>
+        </ScrollViewer>
+      </Border>
+    </Grid>
+
+    <!-- action bar: task count on the left, primary action on the right -->
+    <Border Grid.Row="2" Classes="actionBar">
+      <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+        <ui:SymbolIcon Symbol="List" FontSize="16" VerticalAlignment="Center"
+                       Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+        <Panel Grid.Column="1" VerticalAlignment="Center">
+          <TextBlock Name="CountLabel" Classes="caption" TextTrimming="CharacterEllipsis" />
+        </Panel>
+        <Button Name="StartAllBtn" Grid.Column="2" Classes="accent" MinWidth="120" HorizontalContentAlignment="Center">
+          <StackPanel Orientation="Horizontal" Spacing="8">
+            <ui:SymbolIcon Symbol="Play" FontSize="16" />
+            <TextBlock Text="{svc:Tr 开始处理, Context=BatchProcessInterface}" />
+          </StackPanel>
+        </Button>
+      </Grid>
+    </Border>
+  </Grid>
+</UserControl>

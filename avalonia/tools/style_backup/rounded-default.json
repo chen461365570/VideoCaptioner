@@ -1,0 +1,15 @@
+{
+  "name": "default",
+  "description": "",
+  "mode": "rounded",
+  "font_name": "Noto Sans SC",
+  "font_size": 52,
+  "text_color": "#ffffff",
+  "bg_color": "#191919c8",
+  "corner_radius": 12,
+  "padding_h": 28,
+  "padding_v": 14,
+  "margin_bottom": 60,
+  "line_spacing": 10,
+  "letter_spacing": 0
+}

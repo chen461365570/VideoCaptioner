@@ -1,0 +1,270 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:ui="using:FluentAvalonia.UI.Controls"
+             xmlns:svc="using:VideoCaptioner.Avalonia.Services"
+             xmlns:st="using:VideoCaptioner.Avalonia.Views.Style"
+             x:Class="VideoCaptioner.Avalonia.Views.SubtitleStyleInterface"
+             DragDrop.AllowDrop="True">
+  <!-- Port of ui/view/subtitle_style_interface.py, laid out as a Windows 11 editor page:
+       title + style preset command row on top, setting cards on the left, sticky live preview on the right. -->
+  <Grid RowDefinitions="Auto,*" RowSpacing="12" Margin="28,20,28,0">
+
+    <!-- header row: page title on the left, preset commands on the right -->
+    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+      <StackPanel Spacing="2">
+        <TextBlock Classes="wbTitle" Text="{svc:Tr 字幕样式, Context=SubtitleStyleInterface}" />
+        <TextBlock Classes="caption" TextWrapping="Wrap" Text="{svc:Tr 调整字幕的字体、颜色与排布，并实时预览最终效果, Context=SubtitleStyleInterface}" />
+      </StackPanel>
+      <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+        <Button Name="OpenStyleFolderButton" ToolTip.Tip="{svc:Tr 在文件管理器中打开样式文件夹, Context=SubtitleStyleInterface}">
+          <StackPanel Orientation="Horizontal" Spacing="8">
+            <ui:SymbolIcon Symbol="OpenFolder" FontSize="16" />
+            <TextBlock Text="{svc:Tr 打开样式文件夹, Context=SubtitleStyleInterface}" VerticalAlignment="Center" />
+          </StackPanel>
+        </Button>
+        <Button Name="NewStyleButton" Classes="accent" ToolTip.Tip="{svc:Tr 基于当前样式新建预设, Context=SubtitleStyleInterface}">
+          <StackPanel Orientation="Horizontal" Spacing="8">
+            <ui:SymbolIcon Symbol="Add" FontSize="16" />
+            <TextBlock Text="{svc:Tr 新建样式, Context=SubtitleStyleInterface}" VerticalAlignment="Center" />
+          </StackPanel>
+        </Button>
+      </StackPanel>
+    </Grid>
+
+    <Grid Grid.Row="1">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*" MinWidth="300" />
+        <ColumnDefinition Width="16" />
+        <ColumnDefinition Width="500" />
+      </Grid.ColumnDefinitions>
+
+      <!-- right: style preset on top (fixed), setting cards below (only this list scrolls) -->
+      <Grid Grid.Column="2" RowDefinitions="Auto,*" RowSpacing="12">
+        <Border Name="StylePresetBar" Classes="card" Padding="16,10">
+          <Grid Name="StyleNameCard" ColumnDefinitions="Auto,*" ColumnSpacing="12"
+                ToolTip.Tip="{svc:Tr 选择已保存的字幕样式, Context=SubtitleStyleInterface}">
+            <TextBlock Classes="body" Text="{svc:Tr 选择样式, Context=SubtitleStyleInterface}" VerticalAlignment="Center" />
+            <ComboBox Name="StyleNameComboBox" Grid.Column="1" HorizontalAlignment="Stretch" MaxDropDownHeight="400" />
+          </Grid>
+        </Border>
+      <ScrollViewer Name="SettingsScrollArea" Grid.Row="1" HorizontalScrollBarVisibility="Disabled">
+        <StackPanel Name="SettingsLayout" Margin="0,0,0,20">
+        <StackPanel Name="LayoutGroup" Spacing="4">
+          <TextBlock Classes="section" Text="{svc:Tr 字幕排布, Context=SubtitleStyleInterface}" Margin="1,0,0,8" />
+          <ui:SettingsExpander Name="RenderModeCard" Header="{svc:Tr 渲染模式, Context=SubtitleStyleInterface}" Description="{svc:Tr 选择字幕渲染方式, Context=SubtitleStyleInterface}">
+            <ui:SettingsExpander.IconSource><ui:SymbolIconSource Symbol="ClosedCaption" /></ui:SettingsExpander.IconSource>
+            <ui:SettingsExpander.Footer>
+              <ComboBox Name="RenderModeComboBox" MinWidth="160" MaxWidth="220" MaxDropDownHeight="400" />
+            </ui:SettingsExpander.Footer>
+          </ui:SettingsExpander>
+          <ui:SettingsExpander Name="LayoutCard" Header="{svc:Tr 字幕排布, Context=SubtitleStyleInterface}" Description="{svc:Tr 设置主字幕和副字幕的显示方式, Context=SubtitleStyleInterface}">
+            <ui:SettingsExpander.IconSource><ui:SymbolIconSource Symbol="AlignCenter" /></ui:SettingsExpander.IconSource>
+            <ui:SettingsExpander.Footer>
+              <ComboBox Name="LayoutComboBox" MinWidth="160" MaxWidth="220" MaxDropDownHeight="400" />
+            </ui:SettingsExpander.Footer>
+          </ui:SettingsExpander>
+          <ui:SettingsExpander Name="AssVerticalSpacingCard" Header="{svc:Tr 垂直间距, Context=SubtitleStyleInterface}" Description="{svc:Tr 设置字幕的垂直间距, Context=SubtitleStyleInterface}">
+            <ui:SettingsExpander.IconSource><ui:SymbolIconSource Symbol="DockBottom" /></ui:SettingsExpander.IconSource>
+            <ui:SettingsExpander.Footer>
+              <ui:NumberBox Name="AssVerticalSpacingSpinBox" Minimum="8" Maximum="10000" Value="8" SmallChange="2" LargeChange="2" SimpleNumberFormat="F0" SpinButtonPlacementMode="Compact" Width="120" />
+            </ui:SettingsExpander.Footer>
+          </ui:SettingsExpander>
+        </StackPanel>
+        <StackPanel Name="AssPrimaryGroup" Spacing="4">
+          <TextBlock Classes="section" Text="{svc:Tr 主字幕样式, Context=SubtitleStyleInterface}" />
+          <ui:SettingsExpander Name="AssPrimaryFontCard" Header="{svc:Tr 主字幕字体, Context=SubtitleStyleInterface}" Description="{svc:Tr 设置主字幕的字体, Context=SubtitleStyleInterface}">
+            <ui:SettingsExpander.IconSource><ui:SymbolIconSource Symbol="Font" /></ui:SettingsExpander.IconSource>
+            <ui:SettingsExpander.Footer>
+              <ComboBox Name="AssPrimaryFontComboBox" MinWidth="160" MaxWidth="200" MaxDropDownHeight="400" />
+            </ui:SettingsExpander.Footer>
+          </ui:SettingsExpander>
+          <ui:SettingsExpander Name="AssPrimarySizeCard" Header="{svc:Tr 主字幕字号, Context=SubtitleStyleInterface}" Description="{svc:Tr 设置主字幕的大小, Context=SubtitleStyleInterface}">
+            <ui:SettingsExpander.IconSource><ui:SymbolIconSource Symbol="FontSize" /></ui:SettingsExpander.IconSource>
+            <ui:SettingsExpander.Footer>
+              <ui:NumberBox Name="AssPrimarySizeSpinBox" Minimum="8" Maximum="1000" Value="8" SmallChange="2" LargeChange="2" SimpleNumberFormat="F0" SpinButtonPlacementMode="Compact" Width="120" />
+            </ui:SettingsExpander.Footer>
+          </ui:SettingsExpander>
+          <ui:SettingsExpander Name="AssPrimarySpacingCard" Header="{svc:Tr 主字幕间距, Context=SubtitleStyleInterface}" Description="{svc:Tr 设置主字幕的字符间距, Context=SubtitleStyleInterface}">
+            <ui:SettingsExpander.IconSource><ui:SymbolIconSource Symbol="Character" /></ui:SettingsExpander.IconSource>
+            <ui:SettingsExpander.Footer>
+              <ui:NumberBox Name="AssPrimarySpacingSpinBox" Minimum="0.0" Maximum="10.0" Value="0.0" SmallChange="0.2" LargeChange="0.2" SimpleNumberFormat="F1" SpinButtonPlacementMode="Compact" Width="120" />
+            </ui:SettingsExpander.Footer>
+          </ui:SettingsExpander>
+          <ui:SettingsExpander Name="AssPrimaryColorCard" Header="{svc:Tr 主字幕颜色, Context=SubtitleStyleInterface}" Description="{svc:Tr 设置主字幕的颜色, Context=SubtitleStyleInterface}">
+            <ui:SettingsExpander.IconSource><ui:SymbolIconSource Symbol="ColorFill" /></ui:SettingsExpander.IconSource>
+            <ui:SettingsExpander.Footer>
+              <st:StyleColorButton Name="AssPrimaryColorButton" Title="{svc:Tr 主字幕颜色, Context=SubtitleStyleInterface}" EnableAlpha="False" />
+            </ui:SettingsExpander.Footer>
+          </ui:SettingsExpander>
+          <ui:SettingsExpander Name="AssPrimaryOutlineColorCard" Header="{svc:Tr 主字幕边框颜色, Context=SubtitleStyleInterface}" Description="{svc:Tr 设置主字幕的边框颜色, Context=SubtitleStyleInterface}">
+            <ui:SettingsExpander.IconSource><ui:SymbolIconSource Symbol="ColorLine" /></ui:SettingsExpander.IconSource>
+            <ui:SettingsExpander.Footer>
+              <st:StyleColorButton Name="AssPrimaryOutlineColorButton" Title="{svc:Tr 主字幕边框颜色, Context=SubtitleStyleInterface}" EnableAlpha="False" />
+            </ui:SettingsExpander.Footer>
+          </ui:SettingsExpander>
+          <ui:SettingsExpander Name="AssPrimaryOutlineSizeCard" Header="{svc:Tr 主字幕边框大小, Context=SubtitleStyleInterface}" Description="{svc:Tr 设置主字幕的边框粗细, Context=SubtitleStyleInterface}">
+            <ui:SettingsExpander.IconSource><ui:SymbolIconSource Symbol="Ruler" /></ui:SettingsExpander.IconSource>
+            <ui:SettingsExpander.Footer>
+              <ui:NumberBox Name="AssPrimaryOutlineSizeSpinBox" Minimum="0.0" Maximum="10.0" Value="0.0" SmallChange="0.2" LargeChange="0.2" SimpleNumberFormat="F1" SpinButtonPlacementMode="Compact" Width="120" />
+            </ui:SettingsExpander.Footer>
+          </ui:SettingsExpander>
+        </StackPanel>
+        <StackPanel Name="AssSecondaryGroup" Spacing="4">
+          <TextBlock Classes="section" Text="{svc:Tr 副字幕样式, Context=SubtitleStyleInterface}" />
+          <ui:SettingsExpander Name="AssSecondaryFontCard" Header="{svc:Tr 副字幕字体, Context=SubtitleStyleInterface}" Description="{svc:Tr 设置副字幕的字体, Context=SubtitleStyleInterface}">
+            <ui:SettingsExpander.IconSource><ui:SymbolIconSource Symbol="Font" /></ui:SettingsExpander.IconSource>
+            <ui:SettingsExpander.Footer>
+              <ComboBox Name="AssSecondaryFontComboBox" MinWidth="160" MaxWidth="200" MaxDropDownHeight="400" />
+            </ui:SettingsExpander.Footer>
+          </ui:SettingsExpander>
+          <ui:SettingsExpander Name="AssSecondarySizeCard" Header="{svc:Tr 副字幕字号, Context=SubtitleStyleInterface}" Description="{svc:Tr 设置副字幕的大小, Context=SubtitleStyleInterface}">
+            <ui:SettingsExpander.IconSource><ui:SymbolIconSource Symbol="FontSize" /></ui:SettingsExpander.IconSource>
+            <ui:SettingsExpander.Footer>
+              <ui:NumberBox Name="AssSecondarySizeSpinBox" Minimum="8" Maximum="1000" Value="8" SmallChange="2" LargeChange="2" SimpleNumberFormat="F0" SpinButtonPlacementMode="Compact" Width="120" />
+            </ui:SettingsExpander.Footer>
+          </ui:SettingsExpander>
+          <ui:SettingsExpander Name="AssSecondarySpacingCard" Header="{svc:Tr 副字幕间距, Context=SubtitleStyleInterface}" Description="{svc:Tr 设置副字幕的字符间距, Context=SubtitleStyleInterface}">
+            <ui:SettingsExpander.IconSource><ui:SymbolIconSource Symbol="Character" /></ui:SettingsExpander.IconSource>
+            <ui:SettingsExpander.Footer>
+              <ui:NumberBox Name="AssSecondarySpacingSpinBox" Minimum="0.0" Maximum="50.0" Value="0.0" SmallChange="0.2" LargeChange="0.2" SimpleNumberFormat="F1" SpinButtonPlacementMode="Compact" Width="120" />
+            </ui:SettingsExpander.Footer>
+          </ui:SettingsExpander>
+          <ui:SettingsExpander Name="AssSecondaryColorCard" Header="{svc:Tr 副字幕颜色, Context=SubtitleStyleInterface}" Description="{svc:Tr 设置副字幕的颜色, Context=SubtitleStyleInterface}">
+            <ui:SettingsExpander.IconSource><ui:SymbolIconSource Symbol="ColorFill" /></ui:SettingsExpander.IconSource>
+            <ui:SettingsExpander.Footer>
+              <st:StyleColorButton Name="AssSecondaryColorButton" Title="{svc:Tr 副字幕颜色, Context=SubtitleStyleInterface}" EnableAlpha="False" />
+            </ui:SettingsExpander.Footer>
+          </ui:SettingsExpander>
+          <ui:SettingsExpander Name="AssSecondaryOutlineColorCard" Header="{svc:Tr 副字幕边框颜色, Context=SubtitleStyleInterface}" Description="{svc:Tr 设置副字幕的边框颜色, Context=SubtitleStyleInterface}">
+            <ui:SettingsExpander.IconSource><ui:SymbolIconSource Symbol="ColorLine" /></ui:SettingsExpander.IconSource>
+            <ui:SettingsExpander.Footer>
+              <st:StyleColorButton Name="AssSecondaryOutlineColorButton" Title="{svc:Tr 副字幕边框颜色, Context=SubtitleStyleInterface}" EnableAlpha="False" />
+            </ui:SettingsExpander.Footer>
+          </ui:SettingsExpander>
+          <ui:SettingsExpander Name="AssSecondaryOutlineSizeCard" Header="{svc:Tr 副字幕边框大小, Context=SubtitleStyleInterface}" Description="{svc:Tr 设置副字幕的边框粗细, Context=SubtitleStyleInterface}">
+            <ui:SettingsExpander.IconSource><ui:SymbolIconSource Symbol="Ruler" /></ui:SettingsExpander.IconSource>
+            <ui:SettingsExpander.Footer>
+              <ui:NumberBox Name="AssSecondaryOutlineSizeSpinBox" Minimum="0.0" Maximum="50.0" Value="0.0" SmallChange="0.2" LargeChange="0.2" SimpleNumberFormat="F1" SpinButtonPlacementMode="Compact" Width="120" />
+            </ui:SettingsExpander.Footer>
+          </ui:SettingsExpander>
+        </StackPanel>
+        <StackPanel Name="RoundedBgGroup" Spacing="4">
+          <TextBlock Classes="section" Text="{svc:Tr 圆角背景样式, Context=SubtitleStyleInterface}" />
+          <ui:SettingsExpander Name="RoundedFontCard" Header="{svc:Tr 字体, Context=SubtitleStyleInterface}" Description="{svc:Tr 设置字幕字体, Context=SubtitleStyleInterface}">
+            <ui:SettingsExpander.IconSource><ui:SymbolIconSource Symbol="Font" /></ui:SettingsExpander.IconSource>
+            <ui:SettingsExpander.Footer>
+              <ComboBox Name="RoundedFontComboBox" MinWidth="160" MaxWidth="200" MaxDropDownHeight="400" />
+            </ui:SettingsExpander.Footer>
+          </ui:SettingsExpander>
+          <ui:SettingsExpander Name="RoundedFontSizeCard" Header="{svc:Tr 字体大小, Context=SubtitleStyleInterface}" Description="{svc:Tr 设置字幕字体大小, Context=SubtitleStyleInterface}">
+            <ui:SettingsExpander.IconSource><ui:SymbolIconSource Symbol="FontSize" /></ui:SettingsExpander.IconSource>
+            <ui:SettingsExpander.Footer>
+              <ui:NumberBox Name="RoundedFontSizeSpinBox" Minimum="16" Maximum="120" Value="16" SmallChange="2" LargeChange="2" SimpleNumberFormat="F0" SpinButtonPlacementMode="Compact" Width="120" />
+            </ui:SettingsExpander.Footer>
+          </ui:SettingsExpander>
+          <ui:SettingsExpander Name="RoundedTextColorCard" Header="{svc:Tr 文字颜色, Context=SubtitleStyleInterface}" Description="{svc:Tr 设置字幕文字颜色, Context=SubtitleStyleInterface}">
+            <ui:SettingsExpander.IconSource><ui:SymbolIconSource Symbol="ColorFill" /></ui:SettingsExpander.IconSource>
+            <ui:SettingsExpander.Footer>
+              <st:StyleColorButton Name="RoundedTextColorButton" Title="{svc:Tr 文字颜色, Context=SubtitleStyleInterface}" EnableAlpha="False" />
+            </ui:SettingsExpander.Footer>
+          </ui:SettingsExpander>
+          <ui:SettingsExpander Name="RoundedBgColorCard" Header="{svc:Tr 背景颜色, Context=SubtitleStyleInterface}" Description="{svc:Tr 设置圆角矩形背景颜色, Context=SubtitleStyleInterface}">
+            <ui:SettingsExpander.IconSource><ui:SymbolIconSource Symbol="ColorBackground" /></ui:SettingsExpander.IconSource>
+            <ui:SettingsExpander.Footer>
+              <st:StyleColorButton Name="RoundedBgColorButton" Title="{svc:Tr 背景颜色, Context=SubtitleStyleInterface}" EnableAlpha="True" />
+            </ui:SettingsExpander.Footer>
+          </ui:SettingsExpander>
+          <ui:SettingsExpander Name="RoundedCornerRadiusCard" Header="{svc:Tr 圆角半径, Context=SubtitleStyleInterface}" Description="{svc:Tr 设置背景圆角大小, Context=SubtitleStyleInterface}">
+            <ui:SettingsExpander.IconSource><ui:SymbolIconSource Symbol="Crop" /></ui:SettingsExpander.IconSource>
+            <ui:SettingsExpander.Footer>
+              <ui:NumberBox Name="RoundedCornerRadiusSpinBox" Minimum="0" Maximum="50" Value="0" SmallChange="2" LargeChange="2" SimpleNumberFormat="F0" SpinButtonPlacementMode="Compact" Width="120" />
+            </ui:SettingsExpander.Footer>
+          </ui:SettingsExpander>
+          <ui:SettingsExpander Name="RoundedPaddingHCard" Header="{svc:Tr 水平内边距, Context=SubtitleStyleInterface}" Description="{svc:Tr 文字与背景边缘的水平距离, Context=SubtitleStyleInterface}">
+            <ui:SettingsExpander.IconSource><ui:SymbolIconSource Symbol="AlignJustified" /></ui:SettingsExpander.IconSource>
+            <ui:SettingsExpander.Footer>
+              <ui:NumberBox Name="RoundedPaddingHSpinBox" Minimum="4" Maximum="100" Value="4" SmallChange="2" LargeChange="2" SimpleNumberFormat="F0" SpinButtonPlacementMode="Compact" Width="120" />
+            </ui:SettingsExpander.Footer>
+          </ui:SettingsExpander>
+          <ui:SettingsExpander Name="RoundedPaddingVCard" Header="{svc:Tr 垂直内边距, Context=SubtitleStyleInterface}" Description="{svc:Tr 文字与背景边缘的垂直距离, Context=SubtitleStyleInterface}">
+            <ui:SettingsExpander.IconSource><ui:SymbolIconSource Symbol="AlignDistributed" /></ui:SettingsExpander.IconSource>
+            <ui:SettingsExpander.Footer>
+              <ui:NumberBox Name="RoundedPaddingVSpinBox" Minimum="4" Maximum="50" Value="4" SmallChange="2" LargeChange="2" SimpleNumberFormat="F0" SpinButtonPlacementMode="Compact" Width="120" />
+            </ui:SettingsExpander.Footer>
+          </ui:SettingsExpander>
+          <ui:SettingsExpander Name="RoundedMarginBottomCard" Header="{svc:Tr 底部边距, Context=SubtitleStyleInterface}" Description="{svc:Tr 字幕距视频底部的距离, Context=SubtitleStyleInterface}">
+            <ui:SettingsExpander.IconSource><ui:SymbolIconSource Symbol="DockBottom" /></ui:SettingsExpander.IconSource>
+            <ui:SettingsExpander.Footer>
+              <ui:NumberBox Name="RoundedMarginBottomSpinBox" Minimum="20" Maximum="300" Value="20" SmallChange="2" LargeChange="2" SimpleNumberFormat="F0" SpinButtonPlacementMode="Compact" Width="120" />
+            </ui:SettingsExpander.Footer>
+          </ui:SettingsExpander>
+          <ui:SettingsExpander Name="RoundedLineSpacingCard" Header="{svc:Tr 行间距, Context=SubtitleStyleInterface}" Description="{svc:Tr 双语字幕的行间距, Context=SubtitleStyleInterface}">
+            <ui:SettingsExpander.IconSource><ui:SymbolIconSource Symbol="List" /></ui:SettingsExpander.IconSource>
+            <ui:SettingsExpander.Footer>
+              <ui:NumberBox Name="RoundedLineSpacingSpinBox" Minimum="0" Maximum="50" Value="0" SmallChange="2" LargeChange="2" SimpleNumberFormat="F0" SpinButtonPlacementMode="Compact" Width="120" />
+            </ui:SettingsExpander.Footer>
+          </ui:SettingsExpander>
+          <ui:SettingsExpander Name="RoundedLetterSpacingCard" Header="{svc:Tr 字符间距, Context=SubtitleStyleInterface}" Description="{svc:Tr 每个字符之间的额外间距, Context=SubtitleStyleInterface}">
+            <ui:SettingsExpander.IconSource><ui:SymbolIconSource Symbol="Character" /></ui:SettingsExpander.IconSource>
+            <ui:SettingsExpander.Footer>
+              <ui:NumberBox Name="RoundedLetterSpacingSpinBox" Minimum="0" Maximum="20" Value="0" SmallChange="1" LargeChange="1" SimpleNumberFormat="F0" SpinButtonPlacementMode="Compact" Width="120" />
+            </ui:SettingsExpander.Footer>
+          </ui:SettingsExpander>
+        </StackPanel>
+        </StackPanel>
+      </ScrollViewer>
+      </Grid>
+
+      <!-- left: live preview, sized to the column -->
+      <Panel Name="PreviewColumn" Grid.Column="0" Margin="0,0,0,20">
+        <Border Name="PreviewCard" Classes="card" VerticalAlignment="Top">
+          <StackPanel Spacing="16">
+            <Grid Name="PreviewHeader" ColumnDefinitions="*,Auto">
+              <StackPanel VerticalAlignment="Center" Spacing="2">
+                <TextBlock Classes="cardTitle" Text="{svc:Tr 实时预览, Context=SubtitleStyleInterface}" />
+                <TextBlock Classes="caption" TextWrapping="Wrap" Text="{svc:Tr 可将图片拖放到此页面作为预览背景, Context=SubtitleStyleInterface}" />
+              </StackPanel>
+              <Button Name="PreviewImageButton" Grid.Column="1" VerticalAlignment="Center" Margin="12,0,0,0"
+                      ToolTip.Tip="{svc:Tr 选择预览使用的背景图片, Context=SubtitleStyleInterface}">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                  <ui:SymbolIcon Symbol="Image" FontSize="16" />
+                  <TextBlock Text="{svc:Tr 选择图片, Context=SubtitleStyleInterface}" VerticalAlignment="Center" />
+                </StackPanel>
+              </Button>
+            </Grid>
+
+            <Panel Name="PreviewTopWidget" MinHeight="120">
+              <ui:ProgressRing Name="PreviewLoadingRing" IsIndeterminate="True" Width="32" Height="32"
+                               HorizontalAlignment="Center" VerticalAlignment="Center" />
+              <Border Name="PreviewImageHost" CornerRadius="8" ClipToBounds="True"
+                      HorizontalAlignment="Center" VerticalAlignment="Center">
+                <Image Name="PreviewImage" Stretch="Uniform" />
+              </Border>
+              <Grid Name="PreviewDropOverlay" IsVisible="False" IsHitTestVisible="False">
+                <Border Background="{DynamicResource SolidBackgroundFillColorBaseBrush}" Opacity="0.8" CornerRadius="8" />
+                <Rectangle Name="PreviewDropZone" Classes="dropZone dragOver" />
+                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="8">
+                  <ui:SymbolIcon Symbol="Image" FontSize="48" HorizontalAlignment="Center"
+                                 Foreground="{DynamicResource AccentTextFillColorPrimaryBrush}" />
+                  <TextBlock Classes="strong" HorizontalAlignment="Center" Text="{svc:Tr 释放以设置预览背景, Context=SubtitleStyleInterface}" />
+                  <TextBlock Classes="caption" HorizontalAlignment="Center" Text="{svc:Tr 支持 PNG、JPG 图片, Context=SubtitleStyleInterface}" />
+                </StackPanel>
+              </Grid>
+            </Panel>
+
+            <Grid Name="PreviewBottomLayout" ColumnDefinitions="*,12,*">
+              <StackPanel Name="PreviewTextCard" Spacing="6" ToolTip.Tip="{svc:Tr 设置预览显示的文字内容, Context=SubtitleStyleInterface}">
+                <TextBlock Classes="caption" Text="{svc:Tr 预览文字, Context=SubtitleStyleInterface}" />
+                <ComboBox Name="PreviewTextComboBox" HorizontalAlignment="Stretch" MaxDropDownHeight="400" />
+              </StackPanel>
+              <StackPanel Name="OrientationCard" Grid.Column="2" Spacing="6" ToolTip.Tip="{svc:Tr 设置预览图片的显示方向, Context=SubtitleStyleInterface}">
+                <TextBlock Classes="caption" Text="{svc:Tr 预览方向, Context=SubtitleStyleInterface}" />
+                <ComboBox Name="OrientationComboBox" HorizontalAlignment="Stretch" MaxDropDownHeight="400" />
+              </StackPanel>
+            </Grid>
+          </StackPanel>
+        </Border>
+      </Panel>
+    </Grid>
+  </Grid>
+</UserControl>

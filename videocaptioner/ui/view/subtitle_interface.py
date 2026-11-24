@@ -433,18 +433,13 @@ class SubtitleInterface(QWidget):
             self.subtitle_optimization_thread.stop()  # type: ignore
         self.start_button.setEnabled(True)
         self.task = task
-        self.subtitle_path = task.subtitle_path
         self.update_info(task)
 
     def update_info(self, task: SubtitleTask) -> None:
         """更新页面信息"""
         if not self.task:
             return
-        original_subtitle_save_path = Path(str(self.task.subtitle_path))
-        asr_data = ASRData.from_subtitle_file(str(original_subtitle_save_path))
-        self.model._data = asr_data.to_json()
-        self.model.layoutChanged.emit()
-        self.status_label.setText(self.tr("已加载文件"))
+        self.load_subtitle_file(str(task.subtitle_path))
 
     def start_subtitle_optimization(self, need_create_task: bool = True) -> None:
         if self._is_processing():
@@ -463,15 +458,15 @@ class SubtitleInterface(QWidget):
         self.cancel_button.show()
 
         if need_create_task:
-            # 将当前表格状态写回原文件，保留用户的合并/删除/编辑
-            if self.model._data:
-                ASRData.from_json(self.model._data).to_srt(save_path=self.subtitle_path)
             self.task = TaskFactory.create_subtitle_task(file_path=self.subtitle_path)
         if not self.task:
             self.start_button.setEnabled(True)
             self.cancel_button.hide()
             return
-        self.subtitle_optimization_thread = SubtitleThread(self.task)
+        # Pass an independent table snapshot; never rewrite the imported file
+        # just to carry the user's edits into the processing worker.
+        subtitle_data = ASRData.from_json(self.model._data) if self.model._data else None
+        self.subtitle_optimization_thread = SubtitleThread(self.task, subtitle_data=subtitle_data)
         self.subtitle_optimization_thread.finished.connect(
             self.on_subtitle_optimization_finished
         )
@@ -557,7 +552,6 @@ class SubtitleInterface(QWidget):
             self, self.tr("选择字幕文件"), "", filter_str
         )
         if file_path:
-            self.subtitle_path = file_path
             self.load_subtitle_file(file_path)
 
     def on_save_format_clicked(self, format: str) -> None:
@@ -630,12 +624,32 @@ class SubtitleInterface(QWidget):
             target_dir = str(Path(self.task.subtitle_path).parent)
         open_folder(target_dir)
 
-    def load_subtitle_file(self, file_path: str) -> None:
-        self.subtitle_path = file_path
-        asr_data = ASRData.from_subtitle_file(file_path)
+    def load_subtitle_file(self, file_path: str) -> bool:
+        try:
+            asr_data = ASRData.from_subtitle_file(file_path)
+        except (OSError, UnicodeError, ValueError) as error:
+            InfoBar.error(
+                self.tr("导入失败"),
+                str(error),
+                duration=INFOBAR_DURATION_ERROR,
+                parent=self,
+            )
+            return False
+        if not asr_data.has_data():
+            InfoBar.warning(
+                self.tr("未找到字幕内容"),
+                self.tr("文件中没有可识别的时间轴字幕，请检查文件格式。"),
+                duration=INFOBAR_DURATION_WARNING,
+                parent=self,
+            )
+            return False
+
+        self.model.beginResetModel()
         self.model._data = asr_data.to_json()
-        self.model.layoutChanged.emit()
-        self.status_label.setText(self.tr("已加载文件"))
+        self.model.endResetModel()
+        self.subtitle_path = file_path
+        self.status_label.setText(self.tr("已加载 {0} 条字幕").format(len(asr_data)))
+        return True
 
     def dragEnterEvent(self, event: QDragEnterEvent) -> None:
         event.accept() if event.mimeData().hasUrls() else event.ignore()
@@ -653,7 +667,8 @@ class SubtitleInterface(QWidget):
             is_supported = file_ext in supported_formats
 
             if is_supported:
-                self.load_subtitle_file(file_path)
+                if not self.load_subtitle_file(file_path):
+                    break
                 InfoBar.success(
                     self.tr("导入成功"),
                     self.tr("成功导入") + os.path.basename(file_path),

@@ -3,7 +3,7 @@
   <h1>VideoCaptioner</h1>
   <p>基于大语言模型的视频字幕处理工具 — 语音识别、字幕优化、翻译、视频合成一站式处理</p>
 
-  [在线文档](https://weifeng2333.github.io/VideoCaptioner/) · [CLI 使用](#cli-命令行) · [GUI 桌面版](#gui-桌面版) · [Claude Code Skill](#claude-code-skill)
+  [在线文档](https://weifeng2333.github.io/VideoCaptioner/) · [CLI 使用](#cli-命令行) · [优化字幕链路 (Colab/Wasabi)](./subtitle_pipeline/README.md) · [GUI 桌面版](#gui-桌面版) · [Claude Code Skill](#claude-code-skill)
 </div>
 
 ## 安装

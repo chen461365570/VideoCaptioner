@@ -3,13 +3,13 @@
   "description": "",
   "mode": "rounded",
   "font_name": "Noto Sans SC",
-  "font_size": 28,
-  "text_color": "#000000",
-  "bg_color": "#0de3ffe5",
-  "corner_radius": 14,
-  "padding_h": 18,
-  "padding_v": 16,
-  "margin_bottom": 40,
+  "font_size": 52,
+  "text_color": "#ffffff",
+  "bg_color": "#191919c8",
+  "corner_radius": 12,
+  "padding_h": 28,
+  "padding_v": 14,
+  "margin_bottom": 60,
   "line_spacing": 10,
-  "letter_spacing": 2
+  "letter_spacing": 0
 }

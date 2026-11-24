@@ -1,0 +1,225 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:ui="using:FluentAvalonia.UI.Controls"
+             xmlns:svc="using:VideoCaptioner.Avalonia.Services"
+             xmlns:v="using:VideoCaptioner.Avalonia.Views"
+             x:Class="VideoCaptioner.Avalonia.Views.LlmLogsInterface">
+  <UserControl.Styles>
+    <Style Selector="ListBox#Table ListBoxItem">
+      <Setter Property="Padding" Value="0" />
+      <Setter Property="Margin" Value="4,1" />
+      <Setter Property="MinHeight" Value="40" />
+      <Setter Property="Height" Value="40" />
+      <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+      <Setter Property="VerticalContentAlignment" Value="Stretch" />
+    </Style>
+    <Style Selector="Grid.logRow > TextBlock">
+      <Setter Property="Margin" Value="12,0" />
+      <Setter Property="VerticalAlignment" Value="Center" />
+      <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+      <Setter Property="FontSize" Value="13" />
+    </Style>
+    <Style Selector="Grid.logRow > TextBlock.secondary">
+      <Setter Property="Foreground" Value="{DynamicResource TextFillColorSecondaryBrush}" />
+    </Style>
+    <Style Selector="Grid.logRow > TextBlock.num">
+      <Setter Property="HorizontalAlignment" Value="Right" />
+    </Style>
+    <Style Selector="Grid.logHeader > TextBlock">
+      <Setter Property="Margin" Value="12,0" />
+      <Setter Property="VerticalAlignment" Value="Center" />
+      <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+      <Setter Property="FontSize" Value="12" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+      <Setter Property="Foreground" Value="{DynamicResource TextFillColorSecondaryBrush}" />
+    </Style>
+    <Style Selector="Grid.logHeader > TextBlock.num">
+      <Setter Property="HorizontalAlignment" Value="Right" />
+    </Style>
+    <!-- stage tag -->
+    <Style Selector="Border.tag">
+      <Setter Property="CornerRadius" Value="4" />
+      <Setter Property="Padding" Value="6,1" />
+      <Setter Property="Margin" Value="12,0" />
+      <Setter Property="HorizontalAlignment" Value="Left" />
+      <Setter Property="VerticalAlignment" Value="Center" />
+      <Setter Property="Background" Value="{DynamicResource SubtleFillColorSecondaryBrush}" />
+    </Style>
+    <Style Selector="Border.tag > TextBlock">
+      <Setter Property="FontSize" Value="12" />
+      <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+      <Setter Property="Foreground" Value="{DynamicResource TextFillColorSecondaryBrush}" />
+    </Style>
+    <Style Selector="Border.tag.noStage">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="Padding" Value="0,1" />
+    </Style>
+    <!-- pager -->
+    <Style Selector="Button.pager">
+      <Setter Property="Width" Value="32" />
+      <Setter Property="Height" Value="32" />
+      <Setter Property="Padding" Value="0" />
+      <Setter Property="HorizontalContentAlignment" Value="Center" />
+      <Setter Property="VerticalContentAlignment" Value="Center" />
+    </Style>
+  </UserControl.Styles>
+
+  <!-- Workbench layout: request table on the left, filter + summary of the selected request on the right -->
+  <Grid Margin="28,20,28,20" RowDefinitions="Auto,*" RowSpacing="12">
+    <!-- page title + description -->
+    <StackPanel Spacing="2">
+      <TextBlock Classes="wbTitle" Text="{svc:Tr 请求日志, Context=LLMLogsInterface}" />
+      <TextBlock Classes="caption" TextWrapping="Wrap"
+                 Text="{svc:Tr 查看字幕断句、优化和翻译时发给大模型的每一次请求，包括输入、输出、耗时和 Token 用量。, Context=LLMLogsInterface}" />
+    </StackPanel>
+
+    <Grid Grid.Row="1" ColumnDefinitions="*,16,280">
+      <Grid RowDefinitions="*,Auto" RowSpacing="8">
+        <!-- table card: 时间 118 | 任务ID 84 | 文件 * | 阶段 92 | 模型 * | 耗时 60 | Tokens 72 -->
+        <Border Classes="card" Padding="0" ClipToBounds="True">
+          <Panel>
+            <Grid RowDefinitions="Auto,*">
+              <Border Height="40" Padding="4,0" BorderThickness="0,0,0,1"
+                      BorderBrush="{DynamicResource DividerStrokeColorDefaultBrush}">
+                <Grid Classes="logHeader" ColumnDefinitions="118,84,*,92,*,60,72">
+                  <TextBlock Grid.Column="0" Text="{svc:Tr 时间, Context=LLMLogsInterface}" />
+                  <TextBlock Grid.Column="1" Text="{svc:Tr 任务ID, Context=LLMLogsInterface}" />
+                  <TextBlock Grid.Column="2" Text="{svc:Tr 文件, Context=LLMLogsInterface}" />
+                  <TextBlock Grid.Column="3" Text="{svc:Tr 阶段, Context=LLMLogsInterface}" />
+                  <TextBlock Grid.Column="4" Text="{svc:Tr 模型, Context=LLMLogsInterface}" />
+                  <TextBlock Grid.Column="5" Classes="num" Text="{svc:Tr 耗时, Context=LLMLogsInterface}" />
+                  <TextBlock Grid.Column="6" Classes="num" Text="{svc:Tr Tokens, Context=LLMLogsInterface}" />
+                </Grid>
+              </Border>
+              <ListBox Name="Table" Grid.Row="1" Background="Transparent" SelectionMode="Single" Padding="0,4">
+                <ListBox.ItemTemplate>
+                  <DataTemplate x:DataType="v:LlmLogRow">
+                    <Grid Classes="logRow" ColumnDefinitions="118,84,*,92,*,60,72" Background="Transparent">
+                      <TextBlock Grid.Column="0" Classes="secondary" Text="{Binding Time}" />
+                      <TextBlock Grid.Column="1" Classes="secondary" Text="{Binding TaskId}" ToolTip.Tip="{Binding TaskId}" />
+                      <TextBlock Grid.Column="2" Text="{Binding FileName}" ToolTip.Tip="{Binding FileName}" />
+                      <Border Grid.Column="3" Classes="tag" Classes.noStage="{Binding NoStage}">
+                        <TextBlock Text="{Binding Stage}" />
+                      </Border>
+                      <TextBlock Grid.Column="4" Text="{Binding Model}" ToolTip.Tip="{Binding Model}" />
+                      <TextBlock Grid.Column="5" Classes="num secondary" Text="{Binding Duration}" />
+                      <TextBlock Grid.Column="6" Classes="num" Text="{Binding Tokens}" />
+                    </Grid>
+                  </DataTemplate>
+                </ListBox.ItemTemplate>
+              </ListBox>
+            </Grid>
+
+            <!-- empty state -->
+            <StackPanel Name="EmptyState" IsVisible="False" Spacing="8" Margin="16,40,16,0"
+                        HorizontalAlignment="Center" VerticalAlignment="Center">
+              <ui:SymbolIcon Symbol="Clock" FontSize="48" HorizontalAlignment="Center"
+                             Foreground="{DynamicResource TextFillColorTertiaryBrush}" />
+              <TextBlock Name="EmptyTitle" Classes="strong" HorizontalAlignment="Center" Margin="0,8,0,0"
+                         Text="{svc:Tr 暂无请求日志, Context=LLMLogsInterface}" />
+              <TextBlock Name="EmptyCaption" Classes="caption" HorizontalAlignment="Center" TextAlignment="Center"
+                         TextWrapping="Wrap"
+                         Text="{svc:Tr 调用大模型处理字幕后，请求记录会自动显示在这里, Context=LLMLogsInterface}" />
+            </StackPanel>
+          </Panel>
+        </Border>
+
+        <!-- footer: count + hint | stretch | pager -->
+        <Grid Grid.Row="1" ColumnDefinitions="Auto,Auto,*,Auto,Auto,Auto" ColumnSpacing="12">
+          <TextBlock Name="StatusLabel" Classes="body" VerticalAlignment="Center"
+                     Text="{svc:Tr 共 0 条, Context=LLMLogsInterface}" />
+          <TextBlock Grid.Column="1" Classes="caption" VerticalAlignment="Center"
+                     Foreground="{DynamicResource TextFillColorTertiaryBrush}"
+                     Text="{svc:Tr 双击查看详情, Context=LLMLogsInterface}" />
+          <Button Name="PrevBtn" Grid.Column="3" Classes="pager" IsEnabled="False"
+                  Theme="{StaticResource TransparentButton}"
+                  ToolTip.Tip="{svc:Tr 上一页, Context=LLMLogsInterface}">
+            <ui:SymbolIcon Symbol="ChevronLeft" FontSize="14" />
+          </Button>
+          <TextBlock Name="PageLabel" Grid.Column="4" Classes="body" VerticalAlignment="Center"
+                     MinWidth="48" TextAlignment="Center" Text="1 / 1" />
+          <Button Name="NextBtn" Grid.Column="5" Classes="pager" IsEnabled="False"
+                  Theme="{StaticResource TransparentButton}"
+                  ToolTip.Tip="{svc:Tr 下一页, Context=LLMLogsInterface}">
+            <ui:SymbolIcon Symbol="ChevronRight" FontSize="14" />
+          </Button>
+        </Grid>
+      </Grid>
+
+      <!-- right pane: filter, commands and the selected request -->
+      <Border Grid.Column="2" Classes="card" Padding="0">
+        <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+          <StackPanel Margin="16" Spacing="12">
+            <TextBlock Classes="paneTitle" Text="{svc:Tr 筛选, Context=LLMLogsInterface}" />
+            <TextBox Name="SearchEdit" HorizontalAlignment="Stretch"
+                     Watermark="{svc:Tr 搜索任务ID、文件名、模型..., Context=LLMLogsInterface}">
+              <TextBox.InnerRightContent>
+                <ui:SymbolIcon Symbol="Find" FontSize="14" Margin="0,0,10,0"
+                               Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+              </TextBox.InnerRightContent>
+            </TextBox>
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
+              <Button Name="RefreshBtn" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                  <ui:SymbolIcon Symbol="Sync" FontSize="16" />
+                  <TextBlock Text="{svc:Tr 刷新, Context=LLMLogsInterface}" />
+                </StackPanel>
+              </Button>
+              <Button Name="ClearBtn" Grid.Column="1" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                  <ui:SymbolIcon Symbol="Delete" FontSize="16" />
+                  <TextBlock Text="{svc:Tr 清空日志, Context=LLMLogsInterface}" />
+                </StackPanel>
+              </Button>
+            </Grid>
+
+            <Rectangle Classes="paneDivider" />
+
+            <TextBlock Classes="paneTitle" Text="{svc:Tr 选中的请求, Context=LLMLogsInterface}" />
+            <TextBlock Name="NoSelectionHint" Classes="caption" TextWrapping="Wrap"
+                       Text="{svc:Tr 在左侧选择一条记录查看摘要，双击可打开完整的请求与响应, Context=LLMLogsInterface}" />
+            <StackPanel Name="SelectionSummary" Spacing="10" IsVisible="False">
+              <StackPanel Spacing="2">
+                <TextBlock Classes="caption" Text="{svc:Tr 文件, Context=LLMLogsInterface}" />
+                <TextBlock Name="SummaryFile" TextWrapping="Wrap" MaxLines="3" TextTrimming="CharacterEllipsis" />
+              </StackPanel>
+              <StackPanel Spacing="2">
+                <TextBlock Classes="caption" Text="{svc:Tr 模型, Context=LLMLogsInterface}" />
+                <TextBlock Name="SummaryModel" TextWrapping="Wrap" />
+              </StackPanel>
+              <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="12" RowSpacing="10">
+                <StackPanel Spacing="2">
+                  <TextBlock Classes="caption" Text="{svc:Tr 时间, Context=LLMLogsInterface}" />
+                  <TextBlock Name="SummaryTime" />
+                </StackPanel>
+                <StackPanel Grid.Column="1" Spacing="2">
+                  <TextBlock Classes="caption" Text="{svc:Tr 阶段, Context=LLMLogsInterface}" />
+                  <TextBlock Name="SummaryStage" TextTrimming="CharacterEllipsis" />
+                </StackPanel>
+                <StackPanel Grid.Row="1" Spacing="2">
+                  <TextBlock Classes="caption" Text="{svc:Tr 耗时, Context=LLMLogsInterface}" />
+                  <TextBlock Name="SummaryDuration" />
+                </StackPanel>
+                <StackPanel Grid.Row="1" Grid.Column="1" Spacing="2">
+                  <TextBlock Classes="caption" Text="{svc:Tr Tokens, Context=LLMLogsInterface}" />
+                  <TextBlock Name="SummaryTokens" />
+                </StackPanel>
+              </Grid>
+              <StackPanel Spacing="2">
+                <TextBlock Classes="caption" Text="{svc:Tr 任务ID, Context=LLMLogsInterface}" />
+                <SelectableTextBlock Name="SummaryTaskId" TextWrapping="Wrap" />
+              </StackPanel>
+              <Button Name="DetailBtn" Classes="accent" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
+                      Margin="0,4,0,0">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                  <ui:SymbolIcon Symbol="Document" FontSize="16" />
+                  <TextBlock Text="{svc:Tr 查看详情, Context=LLMLogsInterface}" />
+                </StackPanel>
+              </Button>
+            </StackPanel>
+          </StackPanel>
+        </ScrollViewer>
+      </Border>
+    </Grid>
+  </Grid>
+</UserControl>

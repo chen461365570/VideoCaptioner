@@ -1,0 +1,366 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:c="using:VideoCaptioner.Avalonia.Controls"
+        xmlns:ui="using:FluentAvalonia.UI.Controls">
+
+  <Styles.Resources>
+    <ResourceDictionary>
+    <!-- Icons that FluentAvalonia's Symbol set does not include -->
+    <StreamGeometry x:Key="GithubIconGeometry">M12 .3a12 12 0 0 0-3.8 23.4c.6.1.8-.3.8-.6v-2.2c-3.3.7-4-1.4-4-1.4-.6-1.4-1.4-1.8-1.4-1.8-1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.7-1.6-2.7-.3-5.5-1.3-5.5-6 0-1.2.5-2.3 1.3-3.1-.2-.4-.6-1.6 0-3.2 0 0 1-.3 3.4 1.2a11.5 11.5 0 0 1 6 0C17.3 4.6 18.3 5 18.3 5c.6 1.6.2 2.8.1 3.2.8.8 1.3 1.9 1.3 3.2 0 4.6-2.8 5.6-5.5 5.9.5.4.9 1.1.9 2.2v3.3c0 .3.1.7.8.6A12 12 0 0 0 12 .3</StreamGeometry>
+
+    <!-- qfluentwidgets card colours -->
+    <ResourceDictionary.ThemeDictionaries>
+      <ResourceDictionary x:Key="Light">
+        <SolidColorBrush x:Key="VcSecondaryText" Color="#606060" />
+        <SolidColorBrush x:Key="VcWindowBackground" Color="#F3F3F3" />
+        <SolidColorBrush x:Key="VcCardBackground" Color="#AAFFFFFF" />
+        <SolidColorBrush x:Key="VcCardBorder" Color="#0F000000" />
+      </ResourceDictionary>
+      <ResourceDictionary x:Key="Dark">
+        <SolidColorBrush x:Key="VcSecondaryText" Color="#CECECE" />
+        <SolidColorBrush x:Key="VcWindowBackground" Color="#202020" />
+        <SolidColorBrush x:Key="VcCardBackground" Color="#0DFFFFFF" />
+        <SolidColorBrush x:Key="VcCardBorder" Color="#14000000" />
+      </ResourceDictionary>
+    </ResourceDictionary.ThemeDictionaries>
+    </ResourceDictionary>
+  </Styles.Resources>
+
+  <Style Selector="c|SettingCardGroup">
+    <Setter Property="ItemsPanel">
+      <ItemsPanelTemplate>
+        <StackPanel Spacing="4" />
+      </ItemsPanelTemplate>
+    </Setter>
+    <Setter Property="Template">
+      <ControlTemplate>
+        <StackPanel Spacing="8">
+          <!-- Windows 11 Settings section header (BodyStrongTextBlockStyle) -->
+          <TextBlock Text="{TemplateBinding Title}" FontSize="14" FontWeight="SemiBold"
+                     Margin="2,8,0,0" IsVisible="{TemplateBinding Title, Converter={x:Static ObjectConverters.IsNotNull}}" />
+          <ItemsPresenter Name="PART_Items" ItemsPanel="{TemplateBinding ItemsPanel}" />
+        </StackPanel>
+      </ControlTemplate>
+    </Setter>
+  </Style>
+
+  <!-- Secondary caption text (qfluentwidgets CaptionLabel / contentLabel) -->
+  <Style Selector="TextBlock.caption">
+    <Setter Property="FontSize" Value="12" />
+    <Setter Property="Foreground" Value="{DynamicResource VcSecondaryText}" />
+  </Style>
+  <!-- qfluentwidgets SubtitleLabel / BodyLabel / StrongBodyLabel -->
+  <Style Selector="TextBlock.subtitle">
+    <Setter Property="FontSize" Value="20" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+  </Style>
+  <Style Selector="TextBlock.body">
+    <Setter Property="FontSize" Value="14" />
+  </Style>
+  <Style Selector="TextBlock.strong">
+    <Setter Property="FontSize" Value="14" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+  </Style>
+
+  <!-- SegmentedWidget, Windows 11 SelectorBar look: text items, subtle hover fill,
+       accent pill under the selected item -->
+  <Style Selector="Border.segmented">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Padding" Value="0" />
+  </Style>
+  <Style Selector="ToggleButton.segment">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="MinWidth" Value="120" />
+    <Setter Property="Height" Value="36" />
+    <Setter Property="Padding" Value="16,0" />
+    <Setter Property="FontSize" Value="14" />
+    <Setter Property="Foreground" Value="{DynamicResource TextFillColorSecondaryBrush}" />
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="CornerRadius" Value="{DynamicResource ControlCornerRadius}" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Panel>
+          <ContentPresenter Name="PART_ContentPresenter"
+                            Background="{TemplateBinding Background}"
+                            CornerRadius="{TemplateBinding CornerRadius}"
+                            Padding="{TemplateBinding Padding}"
+                            Foreground="{TemplateBinding Foreground}"
+                            Content="{TemplateBinding Content}"
+                            HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                            VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" />
+          <Border Name="SelectionIndicator" Height="3" Width="16" CornerRadius="1.5"
+                  VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="0,0,0,1"
+                  Background="{DynamicResource AccentFillColorDefaultBrush}" IsVisible="False" />
+        </Panel>
+      </ControlTemplate>
+    </Setter>
+  </Style>
+  <Style Selector="ToggleButton.segment:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource SubtleFillColorSecondaryBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource TextFillColorPrimaryBrush}" />
+  </Style>
+  <Style Selector="ToggleButton.segment:pressed /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource SubtleFillColorTertiaryBrush}" />
+  </Style>
+  <Style Selector="ToggleButton.segment:checked">
+    <Setter Property="Foreground" Value="{DynamicResource TextFillColorPrimaryBrush}" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+  </Style>
+  <Style Selector="ToggleButton.segment:checked /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Foreground" Value="{DynamicResource TextFillColorPrimaryBrush}" />
+  </Style>
+  <Style Selector="ToggleButton.segment:checked:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource SubtleFillColorSecondaryBrush}" />
+  </Style>
+  <Style Selector="ToggleButton.segment:checked /template/ Border#SelectionIndicator">
+    <Setter Property="IsVisible" Value="True" />
+  </Style>
+
+  <!-- Windows 11 tables: horizontal dividers only, quiet header, subtle hover/selection -->
+  <Style Selector="DataGrid">
+    <Setter Property="GridLinesVisibility" Value="Horizontal" />
+    <Setter Property="HorizontalGridLinesBrush" Value="{DynamicResource DividerStrokeColorDefaultBrush}" />
+    <Setter Property="BorderThickness" Value="0" />
+  </Style>
+  <Style Selector="DataGridColumnHeader">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Foreground" Value="{DynamicResource TextFillColorSecondaryBrush}" />
+    <Setter Property="FontSize" Value="12" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+    <Setter Property="SeparatorBrush" Value="Transparent" />
+  </Style>
+  <Style Selector="DataGridRow:pointerover /template/ Rectangle#BackgroundRectangle">
+    <Setter Property="Fill" Value="{DynamicResource SubtleFillColorSecondaryBrush}" />
+    <Setter Property="Opacity" Value="1" />
+  </Style>
+  <Style Selector="DataGridRow:selected /template/ Rectangle#BackgroundRectangle">
+    <Setter Property="Fill" Value="{DynamicResource AccentFillColorDefaultBrush}" />
+    <Setter Property="Opacity" Value="0.18" />
+  </Style>
+  <Style Selector="DataGridCell:current /template/ Grid#FocusVisual">
+    <Setter Property="IsVisible" Value="False" />
+  </Style>
+  <Style Selector="ListBox.table ListBoxItem:selected /template/ ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource SubtleFillColorSecondaryBrush}" />
+  </Style>
+
+  <!-- ===== Windows 11 design system (see DESIGN.md) ===== -->
+  <!-- Page title, like the Windows 11 Settings app (TitleTextBlockStyle) -->
+  <Style Selector="TextBlock.pageTitle">
+    <Setter Property="FontSize" Value="28" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+    <Setter Property="Margin" Value="0,0,0,4" />
+  </Style>
+  <!-- Section header between groups of cards (BodyStrongTextBlockStyle) -->
+  <Style Selector="TextBlock.section">
+    <Setter Property="FontSize" Value="14" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+    <Setter Property="Margin" Value="1,24,0,8" />
+  </Style>
+  <!-- Card title inside a card (SubtitleTextBlockStyle at card scale) -->
+  <Style Selector="TextBlock.cardTitle">
+    <Setter Property="FontSize" Value="16" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+  </Style>
+  <!-- Dashed drop zone for drag & drop targets -->
+  <Style Selector="Rectangle.dropZone">
+    <Setter Property="Stroke" Value="{DynamicResource ControlStrongStrokeColorDefaultBrush}" />
+    <Setter Property="StrokeThickness" Value="1.5" />
+    <Setter Property="StrokeDashArray" Value="4,3" />
+    <Setter Property="RadiusX" Value="8" />
+    <Setter Property="RadiusY" Value="8" />
+    <Setter Property="Fill" Value="{DynamicResource SubtleFillColorTransparentBrush}" />
+  </Style>
+  <Style Selector="Rectangle.dropZone.dragOver">
+    <Setter Property="Stroke" Value="{DynamicResource AccentFillColorDefaultBrush}" />
+    <Setter Property="Fill" Value="{DynamicResource SubtleFillColorSecondaryBrush}" />
+  </Style>
+
+  <!-- ===== Workbench layout: stepper on the home page, content on the left, settings pane on the right,
+       action bar (status + primary action) at the bottom ===== -->
+  <!-- compact page title used in the header row of workbench pages -->
+  <Style Selector="TextBlock.wbTitle">
+    <Setter Property="FontSize" Value="24" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+  </Style>
+  <!-- title of a side pane / pane section -->
+  <Style Selector="TextBlock.paneTitle">
+    <Setter Property="FontSize" Value="14" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+  </Style>
+  <!-- label of a compact option row (label on the left, control on the right) -->
+  <Style Selector="TextBlock.optLabel">
+    <Setter Property="FontSize" Value="14" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+    <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+  </Style>
+  <Style Selector="Rectangle.paneDivider">
+    <Setter Property="Height" Value="1" />
+    <Setter Property="Fill" Value="{DynamicResource DividerStrokeColorDefaultBrush}" />
+  </Style>
+  <!-- bottom action bar -->
+  <Style Selector="Border.actionBar">
+    <Setter Property="Background" Value="{DynamicResource CardBackgroundFillColorDefaultBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource CardStrokeColorDefaultBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="8" />
+    <Setter Property="Padding" Value="16,10" />
+    <Setter Property="MinHeight" Value="56" />
+  </Style>
+  <Style Selector="Border.actionBar Button">
+    <Setter Property="MinHeight" Value="32" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+  </Style>
+
+  <!-- StepBar (Controls/StepBar.cs) -->
+  <Style Selector="ToggleButton.step">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="Height" Value="40" />
+    <Setter Property="Padding" Value="8,0,12,0" />
+    <Setter Property="FontSize" Value="14" />
+    <Setter Property="Foreground" Value="{DynamicResource TextFillColorSecondaryBrush}" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="CornerRadius" Value="6" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <ContentPresenter Name="PART_ContentPresenter"
+                          Background="{TemplateBinding Background}"
+                          CornerRadius="{TemplateBinding CornerRadius}"
+                          Padding="{TemplateBinding Padding}"
+                          Foreground="{TemplateBinding Foreground}"
+                          Content="{TemplateBinding Content}"
+                          VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" />
+      </ControlTemplate>
+    </Setter>
+  </Style>
+  <Style Selector="ToggleButton.step:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource SubtleFillColorSecondaryBrush}" />
+  </Style>
+  <Style Selector="ToggleButton.step:pressed /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource SubtleFillColorTertiaryBrush}" />
+  </Style>
+  <Style Selector="ToggleButton.step:checked /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Foreground" Value="{DynamicResource TextFillColorPrimaryBrush}" />
+  </Style>
+  <Style Selector="ToggleButton.step:checked:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource SubtleFillColorSecondaryBrush}" />
+  </Style>
+  <Style Selector="ToggleButton.step:checked TextBlock.stepLabel">
+    <Setter Property="FontWeight" Value="SemiBold" />
+  </Style>
+  <Style Selector="Border.stepDot">
+    <Setter Property="Width" Value="24" />
+    <Setter Property="Height" Value="24" />
+    <Setter Property="CornerRadius" Value="12" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="BorderBrush" Value="{DynamicResource ControlStrongStrokeColorDefaultBrush}" />
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+  </Style>
+  <Style Selector="Border.stepDot > TextBlock">
+    <Setter Property="FontSize" Value="12" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+    <Setter Property="HorizontalAlignment" Value="Center" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+    <Setter Property="Foreground" Value="{DynamicResource TextFillColorSecondaryBrush}" />
+  </Style>
+  <Style Selector="ToggleButton.step.passed Border.stepDot">
+    <Setter Property="BorderBrush" Value="{DynamicResource AccentFillColorDefaultBrush}" />
+  </Style>
+  <Style Selector="ToggleButton.step.passed Border.stepDot > TextBlock">
+    <Setter Property="Foreground" Value="{DynamicResource AccentTextFillColorPrimaryBrush}" />
+  </Style>
+  <Style Selector="ToggleButton.step:checked Border.stepDot">
+    <Setter Property="BorderBrush" Value="{DynamicResource AccentFillColorDefaultBrush}" />
+    <Setter Property="Background" Value="{DynamicResource AccentFillColorDefaultBrush}" />
+  </Style>
+  <Style Selector="ToggleButton.step:checked Border.stepDot > TextBlock">
+    <Setter Property="Foreground" Value="{DynamicResource TextOnAccentFillColorPrimaryBrush}" />
+  </Style>
+  <Style Selector="Rectangle.stepLine">
+    <Setter Property="Width" Value="28" />
+    <Setter Property="Height" Value="1" />
+    <Setter Property="Margin" Value="2,0,2,0" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+    <Setter Property="Fill" Value="{DynamicResource ControlStrongStrokeColorDefaultBrush}" />
+  </Style>
+  <Style Selector="Rectangle.stepLine.passed">
+    <Setter Property="Fill" Value="{DynamicResource AccentFillColorDefaultBrush}" />
+  </Style>
+
+  <!-- qfluentwidgets CardWidget / SimpleCardWidget -->
+  <Style Selector="Border.card">
+    <Setter Property="Background" Value="{DynamicResource CardBackgroundFillColorDefaultBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource CardStrokeColorDefaultBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="8" />
+    <Setter Property="Padding" Value="16" />
+  </Style>
+  <!-- ===== settings area (Controls/SettingCards.cs): WinUI SettingsCard look ===== -->
+  <Styles>
+  <Styles.Resources>
+    <ResourceDictionary>
+      <!-- A SettingCard shown as a child row of another SettingCard (SettingCard.IsNested):
+           flat row, no icon, text aligned with the parent header, control aligned with the parent control.
+           Keeps the template parts SettingsExpander needs (Expander#Expander, its ToggleButton, ContentHost). -->
+      <ControlTheme x:Key="VcNestedSettingCardTheme" TargetType="ui:SettingsExpander">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Template">
+          <ControlTemplate>
+            <Expander Name="Expander" IsExpanded="False">
+              <Expander.Theme>
+                <ControlTheme TargetType="Expander">
+                  <Setter Property="Template">
+                    <ControlTemplate>
+                      <ToggleButton Name="ToggleButton" Content="{TemplateBinding Header}" Focusable="False"
+                                    HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+                        <ToggleButton.Theme>
+                          <ControlTheme TargetType="ToggleButton">
+                            <Setter Property="Template">
+                              <ControlTemplate>
+                                <ContentPresenter Content="{TemplateBinding Content}" Background="Transparent"
+                                                  HorizontalContentAlignment="Stretch" />
+                              </ControlTemplate>
+                            </Setter>
+                          </ControlTheme>
+                        </ToggleButton.Theme>
+                      </ToggleButton>
+                    </ControlTemplate>
+                  </Setter>
+                </ControlTheme>
+              </Expander.Theme>
+              <Expander.Header>
+                <ui:SettingsExpanderItem Name="ContentHost"
+                                         Content="{TemplateBinding Header}"
+                                         ContentTemplate="{TemplateBinding HeaderTemplate}"
+                                         Description="{TemplateBinding Description}"
+                                         Footer="{TemplateBinding Footer}"
+                                         FooterTemplate="{TemplateBinding FooterTemplate}"
+                                         Padding="58,8,58,8" MinHeight="52"
+                                         Background="Transparent" />
+              </Expander.Header>
+            </Expander>
+          </ControlTemplate>
+        </Setter>
+      </ControlTheme>
+    </ResourceDictionary>
+  </Styles.Resources>
+  <!-- the container of a nested SettingCard row adds no icon placeholder indent (the row sets its own padding) -->
+  <Style Selector="ui|SettingsExpanderItem.vcNestedRow /template/ StackPanel#HeaderRegion">
+    <Setter Property="Margin" Value="0" />
+  </Style>
+  <!-- SwitchSettingCard: bare 40x20 switch (the 开/关 text is a separate label on its left) -->
+  <Style Selector="ToggleSwitch.vcCardSwitch /template/ ContentPresenter#PART_OnContentPresenter, ToggleSwitch.vcCardSwitch /template/ ContentPresenter#PART_OffContentPresenter">
+    <Setter Property="IsVisible" Value="False" />
+  </Style>
+  <!-- 20px header icon with WinUI's 2px inset -->
+  <Style Selector="ui|SettingsExpander.vcCard /template/ ui|SettingsExpanderItem#ContentHost /template/ Viewbox#IconHost">
+    <Setter Property="Margin" Value="2,0,0,0" />
+  </Style>
+  </Styles>
+</Styles>

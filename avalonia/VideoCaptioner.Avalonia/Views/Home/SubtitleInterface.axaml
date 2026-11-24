@@ -1,0 +1,330 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:ui="using:FluentAvalonia.UI.Controls"
+             xmlns:svc="using:VideoCaptioner.Avalonia.Services"
+             xmlns:local="using:VideoCaptioner.Avalonia.Views.Home"
+             x:Class="VideoCaptioner.Avalonia.Views.Home.SubtitleInterface"
+             DragDrop.AllowDrop="True"
+             Focusable="True">
+  <UserControl.Styles>
+    <StyleInclude Source="avares://Avalonia.Controls.DataGrid/Themes/Fluent.xaml" />
+
+    <!-- Windows 11 command bar buttons: subtle (transparent) buttons, 16px icon beside the label -->
+    <Style Selector="Button.cmd, ToggleButton.cmd, DropDownButton.cmd">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderBrush" Value="Transparent" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="Height" Value="32" />
+      <Setter Property="MinWidth" Value="32" />
+      <Setter Property="Padding" Value="10,0" />
+      <Setter Property="VerticalAlignment" Value="Center" />
+      <Setter Property="VerticalContentAlignment" Value="Center" />
+      <Setter Property="CornerRadius" Value="{DynamicResource ControlCornerRadius}" />
+    </Style>
+    <Style Selector="Button.cmd:disabled /template/ ContentPresenter#PART_ContentPresenter,
+                     DropDownButton.cmd:disabled /template/ ContentPresenter#PART_ContentPresenter,
+                     ToggleButton.cmd:disabled /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="Transparent" />
+    </Style>
+    <Style Selector="Button.iconOnly">
+      <Setter Property="Width" Value="36" />
+      <Setter Property="Padding" Value="0" />
+      <Setter Property="HorizontalContentAlignment" Value="Center" />
+    </Style>
+    <!-- AppBarToggleButton checked state: accent fill -->
+    <Style Selector="ToggleButton.cmd:checked /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="{DynamicResource AccentFillColorDefaultBrush}" />
+      <Setter Property="Foreground" Value="{DynamicResource TextOnAccentFillColorPrimaryBrush}" />
+    </Style>
+    <Style Selector="ToggleButton.cmd:checked:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="{DynamicResource AccentFillColorSecondaryBrush}" />
+      <Setter Property="Foreground" Value="{DynamicResource TextOnAccentFillColorPrimaryBrush}" />
+    </Style>
+    <Style Selector="ToggleButton.cmd:checked:pressed /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="{DynamicResource AccentFillColorTertiaryBrush}" />
+      <Setter Property="Foreground" Value="{DynamicResource TextOnAccentFillColorSecondaryBrush}" />
+    </Style>
+    <Style Selector=":is(Button).cmd ui|SymbolIcon">
+      <Setter Property="FontSize" Value="16" />
+    </Style>
+    <Style Selector="Rectangle.cmdSeparator">
+      <Setter Property="Width" Value="1" />
+      <Setter Property="Height" Value="20" />
+      <Setter Property="Margin" Value="4,0" />
+      <Setter Property="VerticalAlignment" Value="Center" />
+      <Setter Property="Fill" Value="{DynamicResource DividerStrokeColorDefaultBrush}" />
+    </Style>
+
+    <!-- Windows 11 table look -->
+    <Style Selector="DataGrid#SubtitleTable">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="RowBackground" Value="Transparent" />
+    </Style>
+    <Style Selector="DataGrid#SubtitleTable DataGridColumnHeader">
+      <Setter Property="Padding" Value="12,0" />
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="Foreground" Value="{DynamicResource TextFillColorSecondaryBrush}" />
+      <Setter Property="FontSize" Value="12" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+    <Style Selector="DataGrid#SubtitleTable DataGridRowHeader">
+      <Setter Property="MinWidth" Value="44" />
+      <Setter Property="Padding" Value="0" />
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="SeparatorBrush" Value="Transparent" />
+      <Setter Property="HorizontalContentAlignment" Value="Center" />
+      <Setter Property="Foreground" Value="{DynamicResource TextFillColorTertiaryBrush}" />
+      <Setter Property="FontSize" Value="12" />
+    </Style>
+    <Style Selector="DataGrid#SubtitleTable DataGridCell">
+      <Setter Property="FontSize" Value="13" />
+    </Style>
+    <Style Selector="DataGrid#SubtitleTable TextBlock.time">
+      <Setter Property="FontFamily" Value="Cascadia Mono, Consolas, Segoe UI Variable, Microsoft YaHei UI" />
+      <Setter Property="FontSize" Value="12" />
+      <Setter Property="Foreground" Value="{DynamicResource TextFillColorSecondaryBrush}" />
+      <Setter Property="VerticalAlignment" Value="Center" />
+      <Setter Property="Margin" Value="12,0" />
+    </Style>
+    <Style Selector="DataGrid#SubtitleTable TextBlock.cellText">
+      <Setter Property="TextWrapping" Value="Wrap" />
+      <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+      <Setter Property="VerticalAlignment" Value="Center" />
+      <Setter Property="Margin" Value="12,0" />
+      <Setter Property="MaxLines" Value="2" />
+    </Style>
+
+    <!-- small badge (tag) -->
+    <Style Selector="Border.badge">
+      <Setter Property="CornerRadius" Value="4" />
+      <Setter Property="Padding" Value="8,2" />
+      <Setter Property="Background" Value="{DynamicResource SubtleFillColorSecondaryBrush}" />
+      <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+
+    <!-- qfluentwidgets ProgressBar.error() -->
+    <Style Selector="ProgressBar.error">
+      <Setter Property="Foreground" Value="{DynamicResource SystemFillColorCriticalBrush}" />
+    </Style>
+  </UserControl.Styles>
+
+  <!-- Workbench layout: subtitle table on the left, processing options on the right, action bar at the bottom -->
+  <Grid RowDefinitions="*,Auto" RowSpacing="12" Margin="0">
+    <Grid ColumnDefinitions="*,16,288">
+      <!-- subtitle table in a card / empty state drop zone -->
+      <Panel>
+        <Border Name="TableCard" Classes="card" Padding="0" ClipToBounds="True" IsVisible="False">
+          <Grid RowDefinitions="Auto,Auto,*">
+            <!-- card header: file name + row count -->
+            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12" Margin="16,12">
+              <ui:SymbolIcon Symbol="ClosedCaption" FontSize="20"
+                             Foreground="{DynamicResource AccentTextFillColorPrimaryBrush}" />
+              <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                <TextBlock Name="FileNameText" Classes="strong" TextTrimming="CharacterEllipsis" />
+                <TextBlock Name="FilePathText" Classes="caption" TextTrimming="PathSegmentEllipsis" />
+              </StackPanel>
+              <Border Grid.Column="2" Classes="badge">
+                <TextBlock Name="RowCountText" FontSize="12"
+                           Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+              </Border>
+            </Grid>
+            <Rectangle Grid.Row="1" Height="1" Fill="{DynamicResource CardStrokeColorDefaultBrush}" />
+            <DataGrid Name="SubtitleTable" Grid.Row="2"
+                      AutoGenerateColumns="False"
+                      HeadersVisibility="All"
+                      SelectionMode="Extended"
+                      CanUserReorderColumns="False"
+                      CanUserSortColumns="False"
+                      CanUserResizeColumns="True"
+                      GridLinesVisibility="Horizontal"
+                      RowHeight="48"
+                      ColumnHeaderHeight="36"
+                      HorizontalGridLinesBrush="{DynamicResource DividerStrokeColorDefaultBrush}">
+              <DataGrid.Columns>
+                <DataGridTemplateColumn Header="{svc:Tr 开始时间, Context=SubtitleTableModel}" Width="104" IsReadOnly="True" CanUserResize="False">
+                  <DataGridTemplateColumn.CellTemplate>
+                    <DataTemplate x:DataType="local:SubtitleRow">
+                      <TextBlock Classes="time" Text="{Binding StartText}" />
+                    </DataTemplate>
+                  </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn Header="{svc:Tr 结束时间, Context=SubtitleTableModel}" Width="104" IsReadOnly="True" CanUserResize="False">
+                  <DataGridTemplateColumn.CellTemplate>
+                    <DataTemplate x:DataType="local:SubtitleRow">
+                      <TextBlock Classes="time" Text="{Binding EndText}" />
+                    </DataTemplate>
+                  </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn Header="{svc:Tr 字幕内容, Context=SubtitleTableModel}" Width="*">
+                  <DataGridTemplateColumn.CellTemplate>
+                    <DataTemplate x:DataType="local:SubtitleRow">
+                      <TextBlock Classes="cellText" Text="{Binding Original}" />
+                    </DataTemplate>
+                  </DataGridTemplateColumn.CellTemplate>
+                  <DataGridTemplateColumn.CellEditingTemplate>
+                    <DataTemplate x:DataType="local:SubtitleRow">
+                      <TextBox Text="{Binding Original, Mode=TwoWay}" VerticalAlignment="Center" Margin="4,0" />
+                    </DataTemplate>
+                  </DataGridTemplateColumn.CellEditingTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn Header="{svc:Tr 翻译字幕, Context=SubtitleTableModel}" Width="*">
+                  <DataGridTemplateColumn.CellTemplate>
+                    <DataTemplate x:DataType="local:SubtitleRow">
+                      <TextBlock Classes="cellText" Text="{Binding Translated}" />
+                    </DataTemplate>
+                  </DataGridTemplateColumn.CellTemplate>
+                  <DataGridTemplateColumn.CellEditingTemplate>
+                    <DataTemplate x:DataType="local:SubtitleRow">
+                      <TextBox Text="{Binding Translated, Mode=TwoWay}" VerticalAlignment="Center" Margin="4,0" />
+                    </DataTemplate>
+                  </DataGridTemplateColumn.CellEditingTemplate>
+                </DataGridTemplateColumn>
+              </DataGrid.Columns>
+            </DataGrid>
+          </Grid>
+        </Border>
+
+        <!-- empty state: drop zone -->
+        <Grid Name="EmptyState">
+          <Border CornerRadius="8" Background="{DynamicResource CardBackgroundFillColorDefaultBrush}" />
+          <Rectangle Name="DropZone" Classes="dropZone" />
+          <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="8" Margin="24">
+            <ui:SymbolIcon Symbol="ClosedCaption" FontSize="48" HorizontalAlignment="Center"
+                           Foreground="{DynamicResource TextFillColorTertiaryBrush}" />
+            <TextBlock Classes="strong" HorizontalAlignment="Center" Margin="0,8,0,0"
+                       Text="{svc:Tr 拖拽字幕文件到此处, Context=SubtitleInterface}" />
+            <TextBlock Name="EmptyHintText" Classes="caption" HorizontalAlignment="Center" TextAlignment="Center"
+                       TextWrapping="Wrap" />
+            <Button Name="EmptySelectButton" HorizontalAlignment="Center" Margin="0,12,0,0">
+              <StackPanel Orientation="Horizontal" Spacing="8">
+                <ui:SymbolIcon Symbol="OpenFile" FontSize="16" />
+                <TextBlock Text="{svc:Tr 选择字幕文件, Context=SubtitleInterface}" VerticalAlignment="Center" />
+              </StackPanel>
+            </Button>
+          </StackPanel>
+        </Grid>
+      </Panel>
+
+      <!-- right pane: file actions + processing options -->
+      <Border Grid.Column="2" Classes="card" Padding="0">
+        <Border.Resources>
+          <x:Double x:Key="ToggleSwitchThemeMinWidth">0</x:Double>
+          <Thickness x:Key="ToggleSwitchTopHeaderMargin">0</Thickness>
+        </Border.Resources>
+        <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+          <StackPanel Name="CommandBar" Margin="16" Spacing="12">
+            <!-- 文件 -->
+            <TextBlock Classes="paneTitle" Text="{svc:Tr 字幕文件, Context=SubtitleInterface}" />
+            <Grid ColumnDefinitions="*,*,Auto" ColumnSpacing="6">
+              <Button Name="FileSelectButton" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
+                      ToolTip.Tip="{svc:Tr 打开字幕文件, Context=SubtitleInterface}">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                  <ui:SymbolIcon Symbol="OpenFile" FontSize="16" />
+                  <TextBlock Text="{svc:Tr 打开, Context=SubtitleInterface}" VerticalAlignment="Center" />
+                </StackPanel>
+              </Button>
+              <DropDownButton Name="SaveButton" Grid.Column="1" HorizontalAlignment="Stretch">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                  <ui:SymbolIcon Symbol="Save" FontSize="16" />
+                  <TextBlock Name="SaveText" VerticalAlignment="Center" />
+                </StackPanel>
+                <DropDownButton.Flyout>
+                  <MenuFlyout Placement="BottomEdgeAlignedLeft" />
+                </DropDownButton.Flyout>
+              </DropDownButton>
+              <Button Name="OpenFolderButton" Grid.Column="2" Width="36" Padding="0" HorizontalContentAlignment="Center"
+                      VerticalAlignment="Stretch"
+                      ToolTip.Tip="{svc:Tr 打开输出文件夹, Context=SubtitleInterface}">
+                <ui:SymbolIcon Symbol="OpenFolder" FontSize="16" />
+              </Button>
+            </Grid>
+
+            <Rectangle Classes="paneDivider" />
+
+            <!-- 处理选项 -->
+            <TextBlock Classes="paneTitle" Text="{svc:Tr 处理选项, Context=SubtitleInterface}" />
+            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10" MinHeight="32">
+              <ui:SymbolIcon Symbol="Edit" FontSize="16" VerticalAlignment="Center" />
+              <TextBlock Name="OptimizeText" Grid.Column="1" Classes="optLabel" />
+              <ToggleSwitch Name="OptimizeButton" Grid.Column="2" Classes="vcCardSwitch" MinWidth="0"
+                            OnContent="{x:Null}" OffContent="{x:Null}" />
+            </Grid>
+            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10" MinHeight="32">
+              <ui:SymbolIcon Symbol="Globe" FontSize="16" VerticalAlignment="Center" />
+              <TextBlock Name="TranslateText" Grid.Column="1" Classes="optLabel" />
+              <ToggleSwitch Name="TranslateButton" Grid.Column="2" Classes="vcCardSwitch" MinWidth="0"
+                            OnContent="{x:Null}" OffContent="{x:Null}" />
+            </Grid>
+            <StackPanel Spacing="6">
+              <TextBlock Classes="caption" Text="{svc:Tr 翻译语言, Context=SubtitleInterface}" />
+              <DropDownButton Name="TargetLanguageButton" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left"
+                              ToolTip.Tip="{svc:Tr 翻译语言, Context=SubtitleInterface}">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                  <ui:SymbolIcon Symbol="Character" FontSize="16" />
+                  <TextBlock Name="TargetLanguageText" VerticalAlignment="Center" />
+                </StackPanel>
+                <DropDownButton.Flyout>
+                  <MenuFlyout Placement="BottomEdgeAlignedLeft" />
+                </DropDownButton.Flyout>
+              </DropDownButton>
+            </StackPanel>
+            <StackPanel Spacing="6">
+              <TextBlock Classes="caption" Text="{svc:Tr 字幕排布, Context=SubtitleInterface}" />
+              <DropDownButton Name="LayoutButton" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left"
+                              ToolTip.Tip="{svc:Tr 字幕排布, Context=SubtitleInterface}">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                  <ui:SymbolIcon Symbol="ViewAll" FontSize="16" />
+                  <TextBlock Name="LayoutText" VerticalAlignment="Center" />
+                </StackPanel>
+                <DropDownButton.Flyout>
+                  <MenuFlyout Placement="BottomEdgeAlignedLeft" />
+                </DropDownButton.Flyout>
+              </DropDownButton>
+            </StackPanel>
+
+            <Rectangle Classes="paneDivider" />
+
+            <!-- 提示词 + 更多设置 -->
+            <Button Name="PromptButton" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left"
+                    ToolTip.Tip="{svc:Tr 文稿提示, Context=PromptDialog}">
+              <StackPanel Orientation="Horizontal" Spacing="8">
+                <ui:SymbolIcon Name="PromptIcon" Symbol="Document" FontSize="16" />
+                <TextBlock Name="PromptText" VerticalAlignment="Center" />
+              </StackPanel>
+            </Button>
+            <Button Name="SettingButton" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left"
+                    ToolTip.Tip="{svc:Tr 字幕设置, Context=SubtitleSettingDialog}">
+              <StackPanel Orientation="Horizontal" Spacing="8">
+                <ui:SymbolIcon Symbol="Settings" FontSize="16" />
+                <TextBlock Text="{svc:Tr 字幕设置, Context=SubtitleSettingDialog}" VerticalAlignment="Center" />
+              </StackPanel>
+            </Button>
+          </StackPanel>
+        </ScrollViewer>
+      </Border>
+    </Grid>
+
+    <!-- action bar: status + progress on the left, cancel + start on the right -->
+    <Border Grid.Row="1" Classes="actionBar">
+      <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="12">
+        <StackPanel VerticalAlignment="Center" Spacing="6">
+          <TextBlock Name="StatusLabel" Classes="caption" TextTrimming="CharacterEllipsis" />
+          <ProgressBar Name="ProgressBar" Minimum="0" Maximum="100" />
+        </StackPanel>
+        <Button Name="CancelButton" Grid.Column="1" IsVisible="False">
+          <StackPanel Orientation="Horizontal" Spacing="8">
+            <ui:SymbolIcon Symbol="Dismiss" FontSize="14" />
+            <TextBlock Name="CancelText" VerticalAlignment="Center" />
+          </StackPanel>
+        </Button>
+        <Button Name="StartButton" Grid.Column="2" Classes="accent" MinWidth="120" Padding="16,0"
+                HorizontalContentAlignment="Center">
+          <StackPanel Orientation="Horizontal" Spacing="8">
+            <ui:SymbolIcon Symbol="PlayFilled" FontSize="14" />
+            <TextBlock Name="StartText" VerticalAlignment="Center" />
+          </StackPanel>
+        </Button>
+      </Grid>
+    </Border>
+  </Grid>
+</UserControl>

@@ -1,0 +1,63 @@
+<wnd:AppWindow xmlns="https://github.com/avaloniaui"
+              xmlns:wnd="using:FluentAvalonia.UI.Windowing"
+              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+              xmlns:ui="using:FluentAvalonia.UI.Controls"
+              xmlns:svc="using:VideoCaptioner.Avalonia.Services"
+              x:Class="VideoCaptioner.Avalonia.Views.MainWindow"
+              Icon="avares://VideoCaptioner/Assets/logo.ico"
+              Title="卡卡字幕助手 -- VideoCaptioner"
+              Width="1280" Height="840" MinWidth="940" MinHeight="620"
+              WindowStartupLocation="CenterScreen">
+  <Grid RowDefinitions="Auto,*">
+    <!-- FluentWindow title bar: icon + title -->
+    <Grid Name="TitleBarHost" Height="48" ColumnDefinitions="Auto,*" Background="Transparent">
+      <Image Source="avares://VideoCaptioner/Assets/logo.png" Width="18" Height="18"
+             Margin="16,0,0,0" VerticalAlignment="Center" />
+      <TextBlock Name="TitleText" Grid.Column="1" Margin="12,0,0,0" FontSize="12"
+                 VerticalAlignment="Center" IsHitTestVisible="False"
+                 />
+    </Grid>
+
+    <ui:NavigationView Name="NavView" Grid.Row="1"
+                       PaneDisplayMode="Auto"
+                       IsPaneOpen="True"
+                       OpenPaneLength="220"
+                       ExpandedModeThresholdWidth="1180"
+                       CompactModeThresholdWidth="760"
+                       IsSettingsVisible="False"
+                       IsBackButtonVisible="False"
+                       IsPaneToggleButtonVisible="True">
+      <ui:NavigationView.MenuItems>
+        <ui:NavigationViewItem Tag="home" Content="{svc:Tr 主页}">
+          <ui:NavigationViewItem.IconSource><ui:SymbolIconSource Symbol="Home" /></ui:NavigationViewItem.IconSource>
+        </ui:NavigationViewItem>
+        <ui:NavigationViewItem Tag="batch" Content="{svc:Tr 批量处理}">
+          <ui:NavigationViewItem.IconSource><ui:SymbolIconSource Symbol="Video" /></ui:NavigationViewItem.IconSource>
+        </ui:NavigationViewItem>
+        <ui:NavigationViewItem Tag="style" Content="{svc:Tr 字幕样式}">
+          <ui:NavigationViewItem.IconSource><ui:SymbolIconSource Symbol="Font" /></ui:NavigationViewItem.IconSource>
+        </ui:NavigationViewItem>
+        <ui:NavigationViewItem Tag="logs" Content="{svc:Tr 请求日志}">
+          <ui:NavigationViewItem.IconSource><ui:SymbolIconSource Symbol="Clock" /></ui:NavigationViewItem.IconSource>
+        </ui:NavigationViewItem>
+        <ui:NavigationViewItemSeparator />
+      </ui:NavigationView.MenuItems>
+      <ui:NavigationView.FooterMenuItems>
+        <ui:NavigationViewItem Tag="github" Content="GitHub" SelectsOnInvoked="False">
+          <ui:NavigationViewItem.IconSource>
+            <ui:PathIconSource Data="{StaticResource GithubIconGeometry}" />
+          </ui:NavigationViewItem.IconSource>
+        </ui:NavigationViewItem>
+        <ui:NavigationViewItem Tag="settings" Content="{svc:Tr 设置}">
+          <ui:NavigationViewItem.IconSource><ui:SymbolIconSource Symbol="Settings" /></ui:NavigationViewItem.IconSource>
+        </ui:NavigationViewItem>
+      </ui:NavigationView.FooterMenuItems>
+
+      <!-- QStackedWidget: all interfaces stay alive, only visibility changes -->
+      <Panel Name="PageHost" />
+    </ui:NavigationView>
+
+    <!-- InfoBar overlay -->
+    <Panel Name="ToastHost" Grid.Row="0" Grid.RowSpan="2" />
+  </Grid>
+</wnd:AppWindow>

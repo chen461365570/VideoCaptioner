@@ -47,3 +47,10 @@ docs/.vitepress/dist/
 .claude/
 CLAUDE.md
 videocaptioner/_version.py
+
+# Avalonia .NET build artifacts, screenshots, and local backup configs
+avalonia/**/bin/
+avalonia/**/obj/
+avalonia/tools/shots/
+avalonia/tools/settings*.json
+**/settings.backup*.json

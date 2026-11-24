@@ -1,6 +1,6 @@
 import os
 from pathlib import Path
-from typing import List
+from typing import List, Optional
 
 from PyQt5.QtCore import QThread, pyqtSignal
 
@@ -67,9 +67,10 @@ class SubtitleThread(QThread):
     update_all = pyqtSignal(dict)
     error = pyqtSignal(str)
 
-    def __init__(self, task: SubtitleTask):
+    def __init__(self, task: SubtitleTask, subtitle_data: Optional[ASRData] = None):
         super().__init__()
         self.task: SubtitleTask = task
+        self.subtitle_data = subtitle_data
         self.subtitle_length = 0
         self.finished_subtitle_length = 0
         self.custom_prompt_text = ""
@@ -118,7 +119,11 @@ class SubtitleThread(QThread):
             subtitle_config = self.task.subtitle_config
             assert subtitle_config is not None, self.tr("字幕配置为空")
 
-            asr_data = ASRData.from_subtitle_file(subtitle_path)
+            asr_data = (
+                self.subtitle_data
+                if self.subtitle_data is not None
+                else ASRData.from_subtitle_file(subtitle_path)
+            )
 
             # 1. 分割成字词级时间戳（对于非断句字幕且开启分割选项）
             if subtitle_config.need_split and not asr_data.is_word_timestamp():

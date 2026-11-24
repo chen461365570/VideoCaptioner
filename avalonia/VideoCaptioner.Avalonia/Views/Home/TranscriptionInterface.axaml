@@ -1,0 +1,197 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:ui="using:FluentAvalonia.UI.Controls"
+             xmlns:svc="using:VideoCaptioner.Avalonia.Services"
+             xmlns:home="using:VideoCaptioner.Avalonia.Views.Home"
+             x:Class="VideoCaptioner.Avalonia.Views.Home.TranscriptionInterface"
+             DragDrop.AllowDrop="True"
+             Background="Transparent">
+  <UserControl.Styles>
+    <!-- Win11 command row: subtle (transparent) buttons with 16px icons -->
+    <Style Selector=":is(Button).cmd">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="Height" Value="36" />
+      <Setter Property="Padding" Value="11,0" />
+      <Setter Property="VerticalAlignment" Value="Center" />
+      <Setter Property="VerticalContentAlignment" Value="Center" />
+    </Style>
+    <Style Selector=":is(Button).cmd:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="{DynamicResource SubtleFillColorSecondaryBrush}" />
+    </Style>
+    <Style Selector=":is(Button).cmd:pressed /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="{DynamicResource SubtleFillColorTertiaryBrush}" />
+    </Style>
+    <Style Selector="DropDownButton.cmd /template/ Border#RootBorder">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderThickness" Value="0" />
+    </Style>
+    <Style Selector="DropDownButton.cmd:pointerover /template/ Border#RootBorder">
+      <Setter Property="Background" Value="{DynamicResource SubtleFillColorSecondaryBrush}" />
+    </Style>
+    <Style Selector="DropDownButton.cmd:pressed /template/ Border#RootBorder">
+      <Setter Property="Background" Value="{DynamicResource SubtleFillColorTertiaryBrush}" />
+    </Style>
+    <Style Selector="Rectangle.cmdSeparator">
+      <Setter Property="Width" Value="1" />
+      <Setter Property="Height" Value="20" />
+      <Setter Property="Margin" Value="4,0" />
+      <Setter Property="VerticalAlignment" Value="Center" />
+      <Setter Property="Fill" Value="{DynamicResource DividerStrokeColorDefaultBrush}" />
+    </Style>
+    <!-- metadata tags (PillPushButton): Win11 tag / badge look -->
+    <Style Selector="Button.tag">
+      <Setter Property="CornerRadius" Value="4" />
+      <Setter Property="Background" Value="{DynamicResource SubtleFillColorSecondaryBrush}" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="Foreground" Value="{DynamicResource TextFillColorSecondaryBrush}" />
+      <Setter Property="FontSize" Value="12" />
+      <Setter Property="MinHeight" Value="0" />
+      <Setter Property="Height" Value="24" />
+      <Setter Property="Padding" Value="8,0" />
+      <Setter Property="VerticalContentAlignment" Value="Center" />
+      <Setter Property="HorizontalContentAlignment" Value="Center" />
+    </Style>
+    <Style Selector="Button.tag:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="{DynamicResource SubtleFillColorSecondaryBrush}" />
+      <Setter Property="Foreground" Value="{DynamicResource TextFillColorSecondaryBrush}" />
+    </Style>
+    <!-- the audio track tag opens a menu: show it as an interactive tag -->
+    <Style Selector="Button.tag.menu">
+      <Setter Property="Foreground" Value="{DynamicResource TextFillColorPrimaryBrush}" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="BorderBrush" Value="{DynamicResource ControlStrokeColorDefaultBrush}" />
+      <Setter Property="Background" Value="{DynamicResource ControlFillColorDefaultBrush}" />
+    </Style>
+    <Style Selector="Button.tag.menu:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="{DynamicResource ControlFillColorSecondaryBrush}" />
+      <Setter Property="Foreground" Value="{DynamicResource TextFillColorPrimaryBrush}" />
+    </Style>
+    <Style Selector="Button.action">
+      <Setter Property="MinWidth" Value="120" />
+      <Setter Property="HorizontalContentAlignment" Value="Center" />
+    </Style>
+  </UserControl.Styles>
+
+  <!-- Workbench layout: media on the left, transcription settings on the right, action bar at the bottom -->
+  <Grid RowDefinitions="*,Auto" RowSpacing="12">
+    <Grid>
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="5*" MinWidth="300" />
+        <ColumnDefinition Width="16" />
+        <ColumnDefinition Width="6*" MinWidth="340" MaxWidth="640" />
+      </Grid.ColumnDefinitions>
+
+      <!-- left: drop zone (no file yet) / media card -->
+      <Panel>
+        <!-- 空状态：尚未加载文件时显示拖放区域 -->
+        <Grid Name="EmptyState">
+          <Border CornerRadius="8" Background="{DynamicResource CardBackgroundFillColorDefaultBrush}" />
+          <Rectangle Name="DropZone" Classes="dropZone" />
+          <StackPanel Margin="24" HorizontalAlignment="Center" VerticalAlignment="Center">
+            <ui:SymbolIcon Symbol="Video" FontSize="48" HorizontalAlignment="Center"
+                           Foreground="{DynamicResource TextFillColorTertiaryBrush}" />
+            <TextBlock Text="{svc:Tr 拖拽音视频文件到此处, Context=TranscriptionInterface}"
+                       FontSize="14" FontWeight="SemiBold" HorizontalAlignment="Center" Margin="0,12,0,2" />
+            <TextBlock Classes="caption" HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap"
+                       Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                       Text="{svc:Tr 支持常见的视频和音频格式，导入后即可开始转录, Context=TranscriptionInterface}" />
+            <Button Name="EmptyOpenButton" HorizontalAlignment="Center" Margin="0,16,0,0">
+              <StackPanel Orientation="Horizontal" Spacing="8">
+                <ui:SymbolIcon Symbol="Folder" FontSize="16" />
+                <TextBlock Text="{svc:Tr 选择文件, Context=TranscriptionInterface}" VerticalAlignment="Center" />
+              </StackPanel>
+            </Button>
+          </StackPanel>
+        </Grid>
+
+        <!-- VideoInfoCard -->
+        <Border Name="MediaCard" Classes="card" IsVisible="False">
+          <Grid RowDefinitions="Auto,Auto,*,Auto" RowSpacing="12">
+            <Border CornerRadius="6" ClipToBounds="True" MaxHeight="300"
+                    Background="{DynamicResource SubtleFillColorSecondaryBrush}">
+              <Image Name="VideoThumbnail" Stretch="Uniform"
+                     Source="avares://VideoCaptioner/Assets/default_thumbnail.jpg" />
+            </Border>
+
+            <StackPanel Grid.Row="1" Spacing="4">
+              <TextBlock Name="VideoTitle" Classes="cardTitle" Text="{svc:Tr 请拖入音频或视频文件, Context=VideoInfoCard}"
+                         TextWrapping="Wrap" MaxLines="2" TextTrimming="CharacterEllipsis" />
+              <TextBlock Name="VideoPath" Classes="caption" TextTrimming="PathSegmentEllipsis" MaxLines="1"
+                         Foreground="{DynamicResource TextFillColorSecondaryBrush}" IsVisible="False" />
+              <WrapPanel Orientation="Horizontal" Margin="0,8,0,0" ItemSpacing="6" LineSpacing="6">
+                <Button Name="ResolutionInfo" Classes="tag" Content="{svc:Tr 画质, Context=VideoInfoCard}" />
+                <Button Name="FileSizeInfo" Classes="tag" Content="{svc:Tr 文件大小, Context=VideoInfoCard}" />
+                <Button Name="DurationInfo" Classes="tag" Content="{svc:Tr 时长, Context=VideoInfoCard}" />
+                <Button Name="AudioTrackButton" Classes="tag menu" Content="{svc:Tr 音轨, Context=VideoInfoCard}" IsVisible="False" />
+              </WrapPanel>
+            </StackPanel>
+
+            <Button Name="OpenFileButton" Grid.Row="3" HorizontalAlignment="Left">
+              <StackPanel Orientation="Horizontal" Spacing="8">
+                <ui:SymbolIcon Symbol="Folder" FontSize="16" />
+                <TextBlock Text="{svc:Tr 打开文件, Context=TranscriptionInterface}" VerticalAlignment="Center" />
+              </StackPanel>
+            </Button>
+          </Grid>
+        </Border>
+      </Panel>
+
+      <!-- right: engine selectors + the setting cards of the selected engine -->
+      <Grid Grid.Column="2" RowDefinitions="Auto,*" RowSpacing="12">
+        <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
+          <DropDownButton Name="ModelButton" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Height="36"
+                          ToolTip.Tip="{svc:Tr 转录模型, Context=TranscriptionInterface}">
+            <StackPanel Orientation="Horizontal" Spacing="8">
+              <ui:SymbolIcon Symbol="Microphone" FontSize="16" />
+              <TextBlock Name="ModelButtonText" Text="{svc:Tr 转录模型, Context=TranscriptionInterface}" VerticalAlignment="Center"
+                         TextTrimming="CharacterEllipsis" />
+            </StackPanel>
+          </DropDownButton>
+          <!-- Avalonia addition: one GPU menu that switches engine + device (bridge/handlers/gpu.py) -->
+          <DropDownButton Name="GpuButton" Grid.Column="1" IsVisible="False" Height="36"
+                          ToolTip.Tip="{svc:Tr 运行转录的显卡（N 卡用 FasterWhisper，其余用 WhisperCpp Vulkan）, Context=TranscriptionInterface}">
+            <StackPanel Orientation="Horizontal" Spacing="8">
+              <PathIcon Name="GpuButtonIcon" Width="16" Height="16" />
+              <TextBlock Name="GpuButtonText" Text="{svc:Tr 显卡, Context=TranscriptionInterface}" VerticalAlignment="Center"
+                         MaxWidth="150" TextTrimming="CharacterEllipsis" />
+            </StackPanel>
+          </DropDownButton>
+          <Button Name="SettingButton" Grid.Column="2" Height="36">
+            <StackPanel Orientation="Horizontal" Spacing="8">
+              <ui:SymbolIcon Symbol="Settings" FontSize="16" />
+              <TextBlock Text="{svc:Tr 转录设置, Context=TranscriptionInterface}" VerticalAlignment="Center" />
+            </StackPanel>
+          </Button>
+        </Grid>
+
+        <!-- 转录引擎设置 (the hosted widget scrolls by itself) -->
+        <home:TranscriptionSettingCard Name="TranscriptionSettingCard" Grid.Row="1" VerticalAlignment="Top" />
+      </Grid>
+    </Grid>
+
+    <!-- action bar: progress on the left, folder + primary action on the right -->
+    <Border Grid.Row="1" Classes="actionBar">
+      <Grid ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="8">
+        <ui:ProgressRing Name="ProgressRing" Width="24" Height="24" IsIndeterminate="False"
+                         Minimum="0" Maximum="100" Value="0" IsVisible="False" VerticalAlignment="Center"
+                         Margin="0,0,4,0" />
+        <TextBlock Grid.Column="1" Classes="caption" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"
+                   Text="{svc:Tr 可将音视频文件拖放到此页面, Context=TranscriptionInterface}" />
+        <Button Name="OpenFolderButton" Grid.Column="2" Classes="action">
+          <StackPanel Orientation="Horizontal" Spacing="8">
+            <ui:SymbolIcon Symbol="OpenFolder" FontSize="16" />
+            <TextBlock Text="{svc:Tr 打开文件夹, Context=VideoInfoCard}" VerticalAlignment="Center" />
+          </StackPanel>
+        </Button>
+        <Button Name="StartButton" Grid.Column="3" Classes="accent action" IsEnabled="False" MaxWidth="260">
+          <StackPanel Orientation="Horizontal" Spacing="8">
+            <ui:SymbolIcon Symbol="Play" FontSize="16" />
+            <TextBlock Name="StartButtonText" Text="{svc:Tr 开始转录, Context=VideoInfoCard}"
+                       TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+          </StackPanel>
+        </Button>
+      </Grid>
+    </Border>
+  </Grid>
+</UserControl>

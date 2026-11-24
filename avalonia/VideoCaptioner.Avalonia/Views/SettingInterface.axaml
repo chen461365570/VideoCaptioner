@@ -1,0 +1,201 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:ui="using:FluentAvalonia.UI.Controls"
+             xmlns:c="using:VideoCaptioner.Avalonia.Controls"
+             xmlns:svc="using:VideoCaptioner.Avalonia.Services"
+             x:Class="VideoCaptioner.Avalonia.Views.SettingInterface">
+  <!-- Port of videocaptioner/ui/view/setting_interface.py, laid out like the Windows 11 Settings app:
+       page title, section headers, and expanders that group dependent options as child rows.
+       Child SettingCards of a SettingCard render as flat rows (see Controls/SettingCards.cs). -->
+  <!-- Two columns: page title + section index on the left (filled in code from the section headers),
+       the setting cards on the right. Only the right column scrolls. -->
+  <Grid ColumnDefinitions="208,*">
+    <Grid RowDefinitions="Auto,*" Margin="28,20,0,20">
+      <TextBlock Name="SettingLabel" Classes="wbTitle" Text="{svc:Tr 设置, Context=SettingInterface}" />
+      <ListBox Name="SectionNav" Grid.Row="1" Margin="-8,12,8,0" Background="Transparent" SelectionMode="Single" />
+    </Grid>
+  <ScrollViewer Name="Scroll" Grid.Column="1" HorizontalScrollBarVisibility="Disabled">
+    <Grid>
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*" MaxWidth="980" />
+      </Grid.ColumnDefinitions>
+    <StackPanel Name="ExpandLayout" Margin="8,20,28,28">
+      <!-- cfg.appRestartSig: inline notice in addition to the toast -->
+      <ui:InfoBar Name="RestartInfoBar" Margin="0,0,0,12" IsOpen="False" IsClosable="True" Severity="Informational"
+                  Title="{svc:Tr 更新成功, Context=SettingInterface}"
+                  Message="{svc:Tr 配置将在重启后生效, Context=SettingInterface}" />
+
+      <!-- 转录配置 -->
+      <TextBlock Classes="section" Margin="1,6,0,8" Text="{svc:Tr 转录配置, Context=SettingInterface}" />
+      <StackPanel Name="TranscribeGroup" Spacing="4">
+        <c:ComboBoxSettingCard Name="TranscribeModelCard" Symbol="Microphone"
+                               ConfigItem="{x:Static svc:Cfg.TranscribeModel}"
+                               Header="{svc:Tr 转录模型, Context=SettingInterface}"
+                               Description="{svc:Tr 语音转换文字要使用的语音识别服务, Context=SettingInterface}">
+          <c:LineEditSettingCard Name="WhisperApiBaseCard" Symbol="Link" IsVisible="False"
+                                 ConfigItem="{x:Static svc:Cfg.WhisperApiBase}" Placeholder="https://api.openai.com/v1"
+                                 Header="{svc:Tr Whisper API Base URL, Context=SettingInterface}"
+                                 Description="{svc:Tr 输入 Whisper API Base URL, Context=SettingInterface}" />
+          <c:LineEditSettingCard Name="WhisperApiKeyCard" Symbol="Permissions" IsVisible="False" IsPassword="True"
+                                 ConfigItem="{x:Static svc:Cfg.WhisperApiKey}" Placeholder="sk-"
+                                 Header="{svc:Tr Whisper API Key, Context=SettingInterface}"
+                                 Description="{svc:Tr 输入 Whisper API Key, Context=SettingInterface}" />
+          <c:EditComboBoxSettingCard Name="WhisperApiModelCard" Symbol="Code" IsVisible="False"
+                                     Header="{svc:Tr Whisper 模型, Context=SettingInterface}"
+                                     Description="{svc:Tr 选择 Whisper 模型, Context=SettingInterface}" />
+          <c:PushSettingCard Name="CheckWhisperConnectionCard" Symbol="Sync" IsVisible="False"
+                             ButtonText="{svc:Tr 测试 Whisper 连接, Context=SettingInterface}"
+                             Header="{svc:Tr 测试 Whisper API 连接, Context=SettingInterface}"
+                             Description="{svc:Tr 点击测试 API 连接是否正常, Context=SettingInterface}" />
+        </c:ComboBoxSettingCard>
+      </StackPanel>
+
+      <!-- LLM配置: provider expander; the key / base url / model rows of each service are created in code -->
+      <TextBlock Classes="section" Text="{svc:Tr LLM配置, Context=SettingInterface}" />
+      <StackPanel Name="LlmGroup" Spacing="4">
+        <c:ComboBoxSettingCard Name="LlmServiceCard" Symbol="Code" IsExpanded="True"
+                               ConfigItem="{x:Static svc:Cfg.LlmService}"
+                               Header="{svc:Tr LLM 提供商, Context=SettingInterface}"
+                               Description="{svc:Tr 选择大模型提供商，用于字幕断句、优化、翻译, Context=SettingInterface}">
+          <c:HyperlinkCard Name="OpenaiOfficialApiCard" Symbol="Repair" IsVisible="False"
+                           Url="https://api.videocaptioner.cn/register?aff=UrLB"
+                           LinkText="{svc:Tr 访问, Context=SettingInterface}"
+                           Header="{svc:Tr VideoCaptioner 官方API, Context=SettingInterface}"
+                           Description="{svc:Tr 集成多种大语言模型，支持高并发字幕优化、翻译, Context=SettingInterface}" />
+          <c:PushSettingCard Name="CheckLlmConnectionCard" Symbol="Link"
+                             ButtonText="{svc:Tr 检查连接, Context=SettingInterface}"
+                             Header="{svc:Tr 检查 LLM 连接, Context=SettingInterface}"
+                             Description="{svc:Tr 点击检查 API 连接是否正常，并获取模型列表, Context=SettingInterface}" />
+        </c:ComboBoxSettingCard>
+      </StackPanel>
+
+      <!-- 翻译服务 -->
+      <TextBlock Classes="section" Text="{svc:Tr 翻译服务, Context=SettingInterface}" />
+      <StackPanel Name="TranslateServiceGroup" Spacing="4">
+        <c:ComboBoxSettingCard Name="TranslatorServiceCard" Symbol="Globe"
+                               ConfigItem="{x:Static svc:Cfg.TranslatorService}"
+                               Header="{svc:Tr 翻译服务, Context=SettingInterface}"
+                               Description="{svc:Tr 选择翻译服务, Context=SettingInterface}">
+          <c:SwitchSettingCard Name="NeedReflectTranslateCard" Symbol="Edit"
+                               ConfigItem="{x:Static svc:Cfg.NeedReflectTranslate}"
+                               Header="{svc:Tr 需要反思翻译, Context=SettingInterface}"
+                               Description="{svc:Tr 启用反思翻译可以提高翻译质量，但耗费更多时间和token, Context=SettingInterface}" />
+          <c:LineEditSettingCard Name="DeeplxEndpointCard" Symbol="Link"
+                                 ConfigItem="{x:Static svc:Cfg.DeeplxEndpoint}" Placeholder="https://api.deeplx.org/translate"
+                                 Header="{svc:Tr DeepLx 后端, Context=SettingInterface}"
+                                 Description="{svc:Tr 输入 DeepLx 的后端地址(开启deeplx翻译时必填), Context=SettingInterface}" />
+          <c:RangeSettingCard Name="BatchSizeCard" Symbol="AlignLeft"
+                              ConfigItem="{x:Static svc:Cfg.BatchSize}"
+                              Header="{svc:Tr 批处理大小, Context=SettingInterface}"
+                              Description="{svc:Tr 每批处理字幕的数量，建议为 10 的倍数, Context=SettingInterface}" />
+        </c:ComboBoxSettingCard>
+        <c:RangeSettingCard Name="ThreadNumCard" Symbol="Forward"
+                            ConfigItem="{x:Static svc:Cfg.ThreadNum}"
+                            Header="{svc:Tr 线程数, Context=SettingInterface}"
+                            Description="{svc:Tr 请求并行处理的数量，模型服务商允许的情况下建议尽可能大，数值越大速度越快, Context=SettingInterface}" />
+      </StackPanel>
+
+      <!-- 翻译与优化 -->
+      <TextBlock Classes="section" Text="{svc:Tr 翻译与优化, Context=SettingInterface}" />
+      <StackPanel Name="TranslateGroup" Spacing="4">
+        <c:SwitchSettingCard Name="SubtitleCorrectCard" Symbol="Edit"
+                             ConfigItem="{x:Static svc:Cfg.NeedOptimize}"
+                             Header="{svc:Tr 字幕校正, Context=SettingInterface}"
+                             Description="{svc:Tr 字幕处理过程是否对生成的字幕错别字、名词等进行校正, Context=SettingInterface}" />
+        <c:SwitchSettingCard Name="SubtitleTranslateCard" Symbol="Character"
+                             ConfigItem="{x:Static svc:Cfg.NeedTranslate}"
+                             Header="{svc:Tr 字幕翻译, Context=SettingInterface}"
+                             Description="{svc:Tr 字幕处理过程是否对生成的字幕进行翻译, Context=SettingInterface}">
+          <c:ComboBoxSettingCard Name="TargetLanguageCard" Symbol="Character"
+                                 ConfigItem="{x:Static svc:Cfg.TargetLanguage}"
+                                 Header="{svc:Tr 目标语言, Context=SettingInterface}"
+                                 Description="{svc:Tr 选择翻译字幕的目标语言, Context=SettingInterface}" />
+        </c:SwitchSettingCard>
+      </StackPanel>
+
+      <!-- 字幕合成配置 -->
+      <TextBlock Classes="section" Text="{svc:Tr 字幕合成配置, Context=SettingInterface}" />
+      <StackPanel Name="SubtitleGroup" Spacing="4">
+        <c:HyperlinkCard Name="SubtitleStyleCard" Symbol="Font" Url=""
+                         LinkText="{svc:Tr 修改, Context=SettingInterface}"
+                         Header="{svc:Tr 字幕样式, Context=SettingInterface}"
+                         Description="{svc:Tr 选择字幕的样式（颜色、大小、字体等）, Context=SettingInterface}" />
+        <c:HyperlinkCard Name="SubtitleLayoutCard" Symbol="AlignLeft" Url=""
+                         LinkText="{svc:Tr 修改, Context=SettingInterface}"
+                         Header="{svc:Tr 字幕布局, Context=SettingInterface}"
+                         Description="{svc:Tr 选择字幕的布局（单语、双语）, Context=SettingInterface}" />
+        <c:SwitchSettingCard Name="NeedVideoCard" Symbol="Video"
+                             ConfigItem="{x:Static svc:Cfg.NeedVideo}"
+                             Header="{svc:Tr 需要合成视频, Context=SettingInterface}"
+                             Description="{svc:Tr 开启时触发合成视频，关闭时跳过, Context=SettingInterface}">
+          <c:SwitchSettingCard Name="SoftSubtitleCard" Symbol="Font"
+                               ConfigItem="{x:Static svc:Cfg.SoftSubtitle}"
+                               Header="{svc:Tr 软字幕, Context=SettingInterface}"
+                               Description="{svc:Tr 开启时字幕可在播放器中关闭或调整，关闭时字幕烧录到视频画面上, Context=SettingInterface}" />
+          <c:ComboBoxSettingCard Name="VideoQualityCard" Symbol="Forward"
+                                 ConfigItem="{x:Static svc:Cfg.VideoQuality}"
+                                 Header="{svc:Tr 视频合成质量, Context=SettingInterface}"
+                                 Description="{svc:Tr 硬字幕视频合成时的质量等级（质量越高文件越大，编码时间越长）, Context=SettingInterface}" />
+        </c:SwitchSettingCard>
+      </StackPanel>
+
+      <!-- 保存配置 -->
+      <TextBlock Classes="section" Text="{svc:Tr 保存配置, Context=SettingInterface}" />
+      <StackPanel Name="SaveGroup" Spacing="4">
+        <c:PushSettingCard Name="SavePathCard" Symbol="Folder"
+                           ButtonText="{svc:Tr 工作文件夹, Context=SettingInterface}"
+                           Header="{svc:Tr 工作目录路径, Context=SettingInterface}" />
+        <c:SwitchSettingCard Name="CacheEnabledCard" Symbol="Clock"
+                             ConfigItem="{x:Static svc:Cfg.CacheEnabled}"
+                             Header="{svc:Tr 启用缓存, Context=SettingInterface}"
+                             Description="{svc:Tr 相同配置下会复用之前的 ASR 和 LLM 结果；关闭缓存后每次重新生成, Context=SettingInterface}" />
+      </StackPanel>
+
+      <!-- 个性化 -->
+      <TextBlock Classes="section" Text="{svc:Tr 个性化, Context=SettingInterface}" />
+      <StackPanel Name="PersonalGroup" Spacing="4">
+        <c:OptionsSettingCard Name="ThemeCard" Symbol="DarkTheme"
+                              Header="{svc:Tr 应用主题, Context=SettingInterface}"
+                              Description="{svc:Tr 更改应用程序的外观, Context=SettingInterface}" />
+        <c:CustomColorSettingCard Name="ThemeColorCard" Symbol="ColorBackground"
+                                  ConfigItem="{x:Static svc:Cfg.ThemeColor}"
+                                  Header="{svc:Tr 主题颜色, Context=SettingInterface}"
+                                  Description="{svc:Tr 更改应用程序的主题颜色, Context=SettingInterface}" />
+        <c:OptionsSettingCard Name="ZoomCard" Symbol="Zoom"
+                              Header="{svc:Tr 界面缩放, Context=SettingInterface}"
+                              Description="{svc:Tr 更改小部件和字体的大小, Context=SettingInterface}" />
+        <c:ComboBoxSettingCard Name="LanguageCard" Symbol="Globe"
+                               Header="{svc:Tr 语言, Context=SettingInterface}"
+                               Description="{svc:Tr 设置您偏好的界面语言, Context=SettingInterface}" />
+      </StackPanel>
+
+      <!-- 关于: Windows 11 "About" expander (app, copyright, version) with help / feedback / update rows -->
+      <TextBlock Classes="section" Text="{svc:Tr 关于, Context=SettingInterface}" />
+      <StackPanel Name="AboutGroup" Spacing="4">
+        <c:SettingCard Name="AboutExpander" Header="VideoCaptioner" IsExpanded="True">
+          <c:SettingCard.IconSource>
+            <ui:BitmapIconSource UriSource="avares://VideoCaptioner/Assets/logo.png" ShowAsMonochrome="False" />
+          </c:SettingCard.IconSource>
+          <c:SettingCard.Footer>
+            <SelectableTextBlock Name="VersionText" VerticalAlignment="Center" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+          </c:SettingCard.Footer>
+          <c:HyperlinkCard Name="HelpCard" Symbol="Help"
+                           Url="https://github.com/WEIFENG2333/VideoCaptioner"
+                           LinkText="{svc:Tr 打开帮助页面, Context=SettingInterface}"
+                           Header="{svc:Tr 帮助, Context=SettingInterface}"
+                           Description="{svc:Tr 发现新功能并了解有关VideoCaptioner的使用技巧, Context=SettingInterface}" />
+          <c:PushSettingCard Name="FeedbackCard" Symbol="Comment"
+                             ButtonText="{svc:Tr 提供反馈, Context=SettingInterface}"
+                             Header="{svc:Tr 提供反馈, Context=SettingInterface}"
+                             Description="{svc:Tr 提供反馈帮助我们改进VideoCaptioner, Context=SettingInterface}" />
+          <c:PrimaryPushSettingCard Name="AboutCard" Symbol="Important"
+                                    ButtonText="{svc:Tr 检查更新, Context=SettingInterface}"
+                                    Header="{svc:Tr 检查更新, Context=SettingInterface}"
+                                    Description="{svc:Tr 前往发布页获取最新版本, Context=SettingInterface}" />
+        </c:SettingCard>
+      </StackPanel>
+    </StackPanel>
+    </Grid>
+  </ScrollViewer>
+  </Grid>
+</UserControl>

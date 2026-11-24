@@ -1,0 +1,207 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:ui="using:FluentAvalonia.UI.Controls"
+             xmlns:svc="using:VideoCaptioner.Avalonia.Services"
+             x:Class="VideoCaptioner.Avalonia.Views.Home.VideoSynthesisInterface"
+             DragDrop.AllowDrop="True">
+  <UserControl.Styles>
+    <!-- file path inputs -->
+    <Style Selector="TextBox.path">
+      <Setter Property="VerticalContentAlignment" Value="Center" />
+      <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+    <Style Selector="ComboBox.option">
+      <Setter Property="MinWidth" Value="140" />
+    </Style>
+    <!-- subtle command button -->
+    <Style Selector="Button.subtle">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderBrush" Value="Transparent" />
+      <Setter Property="Height" Value="32" />
+      <Setter Property="Padding" Value="10,0" />
+      <Setter Property="VerticalContentAlignment" Value="Center" />
+    </Style>
+    <!-- compact option row of the right pane -->
+    <Style Selector="Grid.optRow">
+      <Setter Property="Margin" Value="16,10" />
+      <Setter Property="MinHeight" Value="44" />
+      <Setter Property="ColumnSpacing" Value="14" />
+    </Style>
+    <Style Selector="Grid.optRow > ui|SymbolIcon">
+      <Setter Property="FontSize" Value="20" />
+      <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+    <Style Selector="Grid.optRow > StackPanel">
+      <Setter Property="VerticalAlignment" Value="Center" />
+      <Setter Property="Spacing" Value="1" />
+    </Style>
+    <Style Selector="Grid.optRow > StackPanel > TextBlock">
+      <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+    <Style Selector="Grid.optRow > :is(Control):nth-child(3)">
+      <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+    <Style Selector="Grid.optRow:disabled">
+      <Setter Property="Opacity" Value="0.5" />
+    </Style>
+    <!-- qfluentwidgets ProgressBar.error() -->
+    <Style Selector="ProgressBar.error">
+      <Setter Property="Foreground" Value="{DynamicResource SystemFillColorCriticalBrush}" />
+    </Style>
+  </UserControl.Styles>
+
+  <!-- Workbench layout: input files on the left, synthesis options on the right, action bar at the bottom -->
+  <Grid RowDefinitions="*,Auto" RowSpacing="12" Margin="0">
+    <Grid>
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="5*" MinWidth="320" />
+        <ColumnDefinition Width="16" />
+        <ColumnDefinition Width="4*" MinWidth="320" MaxWidth="480" />
+      </Grid.ColumnDefinitions>
+
+      <!-- left: input files + drop area -->
+      <Grid RowDefinitions="Auto,*" RowSpacing="12">
+        <Border Classes="card" Padding="0">
+          <StackPanel>
+            <StackPanel Margin="16,14,16,10" Spacing="2">
+              <TextBlock Classes="paneTitle" Text="{svc:Tr 输入文件, Context=VideoSynthesisInterface}" />
+              <TextBlock Classes="caption" TextWrapping="Wrap"
+                         Text="{svc:Tr 将字幕嵌入或烧录到视频中，生成新的视频文件, Context=VideoSynthesisInterface}" />
+            </StackPanel>
+            <Rectangle Height="1" Fill="{DynamicResource CardStrokeColorDefaultBrush}" />
+            <!-- 字幕文件选择 -->
+            <Grid ColumnDefinitions="Auto,*,Auto" RowDefinitions="Auto,Auto" ColumnSpacing="12" RowSpacing="8" Margin="16,12">
+              <ui:SymbolIcon Symbol="ClosedCaption" FontSize="20" VerticalAlignment="Center" />
+              <StackPanel Grid.Column="1" Grid.ColumnSpan="2" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                <TextBlock Classes="body" Text="{svc:Tr 字幕文件, Context=VideoSynthesisInterface}" />
+                <TextBlock Classes="caption" Text="SRT / ASS / VTT" VerticalAlignment="Center" />
+              </StackPanel>
+              <TextBox Name="SubtitleInput" Grid.Row="1" Grid.Column="1" Classes="path"
+                       Watermark="{svc:Tr 选择或者拖拽字幕文件, Context=VideoSynthesisInterface}" />
+              <Button Name="SubtitleButton" Grid.Row="1" Grid.Column="2" MinWidth="88" VerticalAlignment="Center">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                  <ui:SymbolIcon Symbol="OpenFolder" FontSize="16" />
+                  <TextBlock Text="{svc:Tr 浏览, Context=VideoSynthesisInterface}" VerticalAlignment="Center" />
+                </StackPanel>
+              </Button>
+            </Grid>
+            <Rectangle Height="1" Fill="{DynamicResource CardStrokeColorDefaultBrush}" />
+            <!-- 视频文件选择 -->
+            <Grid ColumnDefinitions="Auto,*,Auto" RowDefinitions="Auto,Auto" ColumnSpacing="12" RowSpacing="8" Margin="16,12,16,16">
+              <ui:SymbolIcon Symbol="Video" FontSize="20" VerticalAlignment="Center" />
+              <StackPanel Grid.Column="1" Grid.ColumnSpan="2" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                <TextBlock Classes="body" Text="{svc:Tr 视频文件, Context=VideoSynthesisInterface}" />
+                <TextBlock Classes="caption" Text="MP4 / MKV / MOV …" VerticalAlignment="Center" />
+              </StackPanel>
+              <TextBox Name="VideoInput" Grid.Row="1" Grid.Column="1" Classes="path"
+                       Watermark="{svc:Tr 选择或者拖拽视频文件, Context=VideoSynthesisInterface}" />
+              <Button Name="VideoButton" Grid.Row="1" Grid.Column="2" MinWidth="88" VerticalAlignment="Center">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                  <ui:SymbolIcon Symbol="OpenFolder" FontSize="16" />
+                  <TextBlock Text="{svc:Tr 浏览, Context=VideoSynthesisInterface}" VerticalAlignment="Center" />
+                </StackPanel>
+              </Button>
+            </Grid>
+          </StackPanel>
+        </Border>
+
+        <!-- drop area (the whole page is a drop target; this zone shows it and highlights while dragging) -->
+        <Grid Grid.Row="1" MinHeight="96">
+          <Rectangle Name="DropZone" Classes="dropZone" IsHitTestVisible="False" />
+          <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="8" Margin="16">
+            <ui:SymbolIcon Symbol="Download" FontSize="32" HorizontalAlignment="Center"
+                           Foreground="{DynamicResource TextFillColorTertiaryBrush}" />
+            <TextBlock Classes="caption" HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap"
+                       Text="{svc:Tr 也可以将字幕或视频文件拖放到此页面, Context=VideoSynthesisInterface}" />
+          </StackPanel>
+        </Grid>
+      </Grid>
+
+      <!-- right: 合成选项. 合成视频 is the master switch, the rows below depend on it.
+           Compact rows (icon, title + description, control) so the controls stay on the right in a narrow pane. -->
+      <Border Grid.Column="2" Classes="card" Padding="0">
+        <Border.Resources>
+          <x:Double x:Key="ToggleSwitchThemeMinWidth">0</x:Double>
+          <Thickness x:Key="ToggleSwitchTopHeaderMargin">0</Thickness>
+        </Border.Resources>
+        <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+          <StackPanel>
+            <TextBlock Classes="paneTitle" Margin="16,14,16,12" Text="{svc:Tr 合成选项, Context=VideoSynthesisInterface}" />
+            <Rectangle Height="1" Fill="{DynamicResource CardStrokeColorDefaultBrush}" />
+
+            <Grid Classes="optRow" ColumnDefinitions="Auto,*,Auto">
+              <ui:SymbolIcon Symbol="Video" />
+              <StackPanel Grid.Column="1">
+                <TextBlock Classes="body" Text="{svc:Tr 合成视频, Context=VideoSynthesisInterface}" />
+                <TextBlock Classes="caption" Text="{svc:Tr 是否生成新的视频文件, Context=VideoSynthesisInterface}" />
+              </StackPanel>
+              <ToggleSwitch Name="NeedVideoAction" Grid.Column="2" OnContent="{svc:Tr 开}" OffContent="{svc:Tr 关}" />
+            </Grid>
+            <Rectangle Height="1" Fill="{DynamicResource CardStrokeColorDefaultBrush}" />
+
+            <Grid Name="VideoQualityCard" Classes="optRow" ColumnDefinitions="Auto,*,Auto">
+              <ui:SymbolIcon Symbol="FourBars" />
+              <StackPanel Grid.Column="1">
+                <TextBlock Classes="body" Text="{svc:Tr 视频质量, Context=VideoSynthesisInterface}" />
+                <TextBlock Classes="caption" Text="{svc:Tr 质量越高文件越大，合成耗时越长, Context=VideoSynthesisInterface}" />
+              </StackPanel>
+              <ComboBox Name="VideoQualityButton" Grid.Column="2" Classes="option" />
+            </Grid>
+
+            <Grid Name="SoftSubtitleCard" Classes="optRow" ColumnDefinitions="Auto,*,Auto">
+              <ui:SymbolIcon Symbol="Font" />
+              <StackPanel Grid.Column="1">
+                <TextBlock Classes="body" Text="{svc:Tr 软字幕, Context=VideoSynthesisInterface}" />
+                <TextBlock Classes="caption" Text="{svc:Tr 使用软字幕嵌入视频, Context=VideoSynthesisInterface}" />
+              </StackPanel>
+              <ToggleSwitch Name="SoftSubtitleAction" Grid.Column="2" OnContent="{svc:Tr 开}" OffContent="{svc:Tr 关}" />
+            </Grid>
+
+            <Grid Name="UseStyleCard" Classes="optRow" ColumnDefinitions="Auto,*,Auto">
+              <ui:SymbolIcon Symbol="ColorFill" />
+              <StackPanel Grid.Column="1">
+                <TextBlock Classes="body" Text="{svc:Tr 使用样式, Context=VideoSynthesisInterface}" />
+                <TextBlock Classes="caption" Text="{svc:Tr 启用字幕样式渲染, Context=VideoSynthesisInterface}" />
+              </StackPanel>
+              <ToggleSwitch Name="UseStyleAction" Grid.Column="2" OnContent="{svc:Tr 开}" OffContent="{svc:Tr 关}" />
+            </Grid>
+
+            <Grid Name="RenderModeCard" Classes="optRow" ColumnDefinitions="Auto,*,Auto">
+              <ui:SymbolIcon Symbol="FontSize" />
+              <StackPanel Grid.Column="1">
+                <TextBlock Classes="body" Text="{svc:Tr 渲染模式, Context=VideoSynthesisInterface}" />
+                <TextBlock Classes="caption" Text="{svc:Tr 开启使用样式后，选择字幕样式的渲染方式, Context=VideoSynthesisInterface}" />
+              </StackPanel>
+              <ComboBox Name="RenderModeButton" Grid.Column="2" Classes="option" />
+            </Grid>
+          </StackPanel>
+        </ScrollViewer>
+      </Border>
+    </Grid>
+
+    <!-- action bar: status + progress on the left, folder + primary action on the right -->
+    <Border Grid.Row="1" Classes="actionBar">
+      <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="12">
+        <StackPanel VerticalAlignment="Center" Spacing="6">
+          <TextBlock Name="StatusLabel" Classes="caption" TextTrimming="CharacterEllipsis"
+                     Text="{svc:Tr 就绪, Context=VideoSynthesisInterface}" />
+          <ProgressBar Name="ProgressBar" Minimum="0" Maximum="100" Value="0" />
+        </StackPanel>
+        <Button Name="FolderAction" Grid.Column="1"
+                ToolTip.Tip="{svc:Tr 打开输出文件夹, Context=VideoSynthesisInterface}">
+          <StackPanel Orientation="Horizontal" Spacing="8">
+            <ui:SymbolIcon Symbol="OpenFolder" FontSize="16" />
+            <TextBlock Text="{svc:Tr 打开输出文件夹, Context=VideoSynthesisInterface}" VerticalAlignment="Center" />
+          </StackPanel>
+        </Button>
+        <Button Name="SynthesizeButton" Grid.Column="2" Classes="accent" MinWidth="120" Padding="16,0"
+                HorizontalContentAlignment="Center">
+          <StackPanel Orientation="Horizontal" Spacing="8">
+            <ui:SymbolIcon Symbol="PlayFilled" FontSize="14" />
+            <TextBlock Text="{svc:Tr 开始合成, Context=VideoSynthesisInterface}" VerticalAlignment="Center" />
+          </StackPanel>
+        </Button>
+      </Grid>
+    </Border>
+  </Grid>
+</UserControl>

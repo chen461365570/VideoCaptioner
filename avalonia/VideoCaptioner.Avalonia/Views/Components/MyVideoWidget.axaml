@@ -1,0 +1,122 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:ui="using:FluentAvalonia.UI.Controls"
+        xmlns:vlc="using:LibVLCSharp.Avalonia"
+        x:Class="VideoCaptioner.Avalonia.Views.Components.MyVideoWidget"
+        x:Name="Root"
+        Title="VideoCaptioner"
+        Icon="avares://VideoCaptioner/Assets/logo.png"
+        Width="800" Height="600" MinWidth="480" MinHeight="360"
+        WindowStartupLocation="CenterScreen"
+        Background="{DynamicResource SolidBackgroundFillColorBaseBrush}"
+        DragDrop.AllowDrop="True">
+  <Window.Styles>
+    <!-- Windows 11 Media Player transport buttons: subtle 40x40, 20px icons -->
+    <Style Selector="Button.transport">
+      <Setter Property="Width" Value="40" />
+      <Setter Property="Height" Value="40" />
+      <Setter Property="Padding" Value="0" />
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderBrush" Value="Transparent" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="CornerRadius" Value="{DynamicResource ControlCornerRadius}" />
+      <Setter Property="HorizontalContentAlignment" Value="Center" />
+      <Setter Property="VerticalContentAlignment" Value="Center" />
+      <Setter Property="VerticalAlignment" Value="Center" />
+      <Setter Property="Focusable" Value="False" />
+    </Style>
+    <Style Selector="Button.transport ui|SymbolIcon">
+      <Setter Property="FontSize" Value="20" />
+    </Style>
+    <Style Selector="Button.small">
+      <Setter Property="Width" Value="32" />
+      <Setter Property="Height" Value="32" />
+    </Style>
+    <Style Selector="Button.small ui|SymbolIcon">
+      <Setter Property="FontSize" Value="16" />
+    </Style>
+    <!-- round play / pause button -->
+    <Style Selector="Button.playPause">
+      <Setter Property="Width" Value="48" />
+      <Setter Property="Height" Value="48" />
+      <Setter Property="Padding" Value="0" />
+      <Setter Property="CornerRadius" Value="24" />
+      <Setter Property="HorizontalContentAlignment" Value="Center" />
+      <Setter Property="VerticalContentAlignment" Value="Center" />
+      <Setter Property="VerticalAlignment" Value="Center" />
+      <Setter Property="Focusable" Value="False" />
+    </Style>
+    <Style Selector="Button.playPause ui|SymbolIcon">
+      <Setter Property="FontSize" Value="20" />
+    </Style>
+    <Style Selector="TextBlock.time">
+      <Setter Property="FontSize" Value="12" />
+      <Setter Property="Foreground" Value="{DynamicResource TextFillColorSecondaryBrush}" />
+      <Setter Property="VerticalAlignment" Value="Center" />
+      <Setter Property="MinWidth" Value="52" />
+    </Style>
+  </Window.Styles>
+
+  <Grid RowDefinitions="*,Auto">
+    <!-- video surface: letterbox black + drop hint -->
+    <Panel Name="VideoHost" Background="Black">
+      <StackPanel Name="TipPanel" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="16"
+                  IsVisible="{Binding #TipLabel.IsVisible}">
+        <ui:SymbolIcon Symbol="Video" FontSize="48" HorizontalAlignment="Center" Foreground="#80FFFFFF" />
+        <TextBlock Name="TipLabel" HorizontalAlignment="Center" Foreground="#B3FFFFFF" FontSize="16" FontWeight="SemiBold" />
+      </StackPanel>
+      <!-- VideoView is a native child window (airspace): it stays hidden until a video is set,
+           so the tip label never has to be drawn on top of it. -->
+      <vlc:VideoView Name="VideoView" IsVisible="False" />
+    </Panel>
+
+    <!-- transport bar (Windows 11 Media Player style) -->
+    <Border Name="PlayBar" Grid.Row="1" Padding="16,6,16,10"
+            Background="{DynamicResource SolidBackgroundFillColorSecondaryBrush}"
+            BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="0,1,0,0">
+      <Grid RowDefinitions="Auto,Auto">
+        <!-- timeline: elapsed, seek slider, remaining -->
+        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+          <TextBlock Name="CurrentTimeLabel" Classes="time" Text="0:00:00" TextAlignment="Left" />
+          <Slider Name="ProgressSlider" Grid.Column="1" Minimum="0" Maximum="0" Value="0"
+                  VerticalAlignment="Center" Focusable="False" />
+          <TextBlock Name="RemainTimeLabel" Grid.Column="2" Classes="time" Text="0:00:00" TextAlignment="Right" />
+        </Grid>
+
+        <!-- controls: title on the left, transport in the middle, volume on the right -->
+        <Grid Grid.Row="1" ColumnDefinitions="*,Auto,*">
+          <TextBlock Classes="body" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" Margin="0,0,12,0"
+                     Text="{Binding #Root.Title}" FontWeight="SemiBold" />
+          <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12">
+            <Button Name="SkipBackButton" Classes="transport" ToolTip.Tip="-5s">
+              <ui:SymbolIcon Symbol="Previous" />
+            </Button>
+            <Button Name="PlayButton" Classes="accent playPause">
+              <ui:SymbolIcon Name="PlayIcon" Symbol="PlayFilled" />
+            </Button>
+            <Button Name="SkipForwardButton" Classes="transport" ToolTip.Tip="+5s">
+              <ui:SymbolIcon Symbol="Next" />
+            </Button>
+          </StackPanel>
+          <Button Name="VolumeButton" Grid.Column="2" Classes="transport" HorizontalAlignment="Right">
+            <ui:SymbolIcon Name="VolumeIcon" Symbol="Volume" />
+            <Button.Flyout>
+              <Flyout Placement="TopEdgeAlignedRight">
+                <!-- VolumeView: mute button, slider, value label -->
+                <Grid Width="280" ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8">
+                  <Button Name="MuteButton" Classes="transport small">
+                    <ui:SymbolIcon Name="MuteIcon" Symbol="Volume" />
+                  </Button>
+                  <Slider Name="VolumeSlider" Grid.Column="1" Minimum="0" Maximum="100"
+                          VerticalAlignment="Center" />
+                  <TextBlock Name="VolumeLabel" Grid.Column="2" Classes="time" Text="30"
+                             MinWidth="28" TextAlignment="Right" />
+                </Grid>
+              </Flyout>
+            </Button.Flyout>
+          </Button>
+        </Grid>
+      </Grid>
+    </Border>
+  </Grid>
+</Window>
