@@ -63,7 +63,7 @@ run_restore_local() {
     command -v uv >/dev/null || curl -LsSf https://astral.sh/uv/install.sh | sh
     [ -x "$py" ] || uv venv "${INSTALL_DIR}/.venv" --python 3.12
     uv pip install --python "$py" -r "${INSTALL_DIR}/subtitle_pipeline/colab/requirements-colab-headless.txt"
-    uv pip install --python "$py" --no-deps --no-build-isolation -e "${INSTALL_DIR}"
+    uv pip install --python "$py" --no-deps -e "${INSTALL_DIR}"
     "$py" -c "import faster_whisper, ctranslate2, numpy, videocaptioner; print('VC_COLAB_VENV_OK', faster_whisper.__version__, 'ct2:', ctranslate2.__version__, 'cuda_devs:', ctranslate2.get_cuda_device_count())"
   else
     log "VideoCaptioner .venv ok, skip"
@@ -120,7 +120,7 @@ if [ "$need_venv" -eq 1 ]; then
   command -v uv >/dev/null || curl -LsSf https://astral.sh/uv/install.sh | sh
   [ -x "$py" ] || uv venv "${INSTALL_DIR}/.venv" --python 3.12
   uv pip install --python "$py" -r "${INSTALL_DIR}/subtitle_pipeline/colab/requirements-colab-headless.txt"
-  uv pip install --python "$py" --no-deps --no-build-isolation -e "${INSTALL_DIR}"
+  uv pip install --python "$py" --no-deps -e "${INSTALL_DIR}"
   "$py" -c "import faster_whisper, ctranslate2, numpy, videocaptioner; print('VC_COLAB_VENV_OK', faster_whisper.__version__, 'ct2:', ctranslate2.__version__, 'cuda_devs:', ctranslate2.get_cuda_device_count())"
 else
   log "VideoCaptioner .venv ok, skip"
